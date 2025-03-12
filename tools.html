@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenBalance | Digital Wellbeing Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6', // deeper blue
+                        'primary-light': '#f0f7ff', // pale blue
+                        'text-dark': '#1e3a8a', // navy blue
+                        'text-body': '#333333', // dark gray
+                        'accent-green': '#65a30d', // lime green
+                        'accent-orange': '#f97316', // orange
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        /* Custom CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        .tool-card {
+            transition: all 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .tool-preview {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-preview:hover img {
+            transform: scale(1.03);
+        }
+        
+        .tool-preview img {
+            transition: transform 0.5s ease;
+        }
+        
+        .tool-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tool-preview:hover .tool-overlay {
+            opacity: 1;
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+        }
+        
+        .pricing-card {
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .premium-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        .progress-circle {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+        
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(#3b82f6 0%, #3b82f6 65%, #e5e7eb 65%, #e5e7eb 100%);
+            mask: radial-gradient(white, transparent 70%);
+            -webkit-mask: radial-gradient(white, transparent 70%);
+        }
+        
+        .dark .progress-circle::before {
+            background: conic-gradient(#3b82f6 0%, #3b82f6 65%, #374151 65%, #374151 100%);
+        }
+        
+        .chart-bar {
+            height: 16px;
+            border-radius: 8px;
+            transition: width 1.5s ease-out;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dark mode styles */
+        .dark body {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+        .dark .bg-primary-light {
+            background-color: #1e293b;
+        }
+        .dark .text-text-body {
+            color: #d1d5db;
+        }
+        .dark .text-text-dark {
+            color: #e5e7eb;
+        }
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+        .dark .shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="font-sans bg-primary-light dark:bg-gray-900 text-text-body min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <!-- Logo -->
+                        <div class="flex-shrink-0 flex items-center">
+                            <a href="index.html" class="text-primary dark:text-blue-400 text-2xl font-bold">
+                                <i class="fas fa-balance-scale-right mr-2"></i>
+                                ScreenBalance
+                            </a>
+                        </div>
+                        <!-- Desktop Navigation Links -->
+                        <div class="hidden md:ml-6 md:flex md:space-x-8">
+                            <a href="index.html" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Home</a>
+                            <a href="about.html" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">About</a>
+                            <a href="tools.html" class="border-b-2 border-primary text-text-dark dark:text-white font-medium text-base px-1 pt-1">Tools</a>
+                            <a href="stories.html" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Success Stories</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <!-- Login/Signup Buttons -->
+                        <div class="flex items-center space-x-3">
+                            <a href="login.html" class="text-primary dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                                Log in
+                            </a>
+                            <a href="signup.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                Sign up
+                            </a>
+                        </div>
+                        
+                        <!-- Mobile menu button -->
+                        <div class="flex md:hidden ml-4">
+                            <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-text-dark dark:text-gray-400 hover:text-primary hover:bg-primary-light dark:hover:bg-gray-700 focus:outline-none">
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="index.html" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                    <a href="about.html" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">About</a>
+                    <a href="tools.html" class="bg-primary-light dark:bg-gray-900 text-primary dark:text-white block px-3 py-2 rounded-md text-base font-medium">Tools</a>
+                    <a href="stories.html" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Success Stories</a>
+                </div>
+                <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center px-5 justify-between">
+                        <div>
+                            <a href="login.html" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">
+                                Log in
+                            </a>
+                        </div>
+                        <div>
+                            <a href="signup.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                Sign up
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <!-- Hero Section -->
+            <div class="bg-primary dark:bg-gray-800 py-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="md:flex md:items-center md:justify-between">
+                        <div class="md:w-1/2 mb-10 md:mb-0">
+                            <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                                Tools That Transform Your Digital Life
+                            </h1>
+                            <p class="mt-4 text-lg text-blue-100 dark:text-gray-300">
+                                ScreenBalance offers powerful yet simple tools designed specifically for students. Track your digital habits, set healthy limits, and build a better relationship with technology.
+                            </p>
+                            <div class="mt-8 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                                <a href="signup.html" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-primary bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                                    Get Started Free
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                                <a href="#tool-overview" class="inline-flex items-center justify-center px-6 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                                    Explore Tools
+                                    <i class="fas fa-chevron-down ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 flex justify-center">
+                            <div class="relative">
+                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-xl overflow-hidden max-w-md">
+                                    <div class="p-3 bg-primary dark:bg-gray-600 text-white flex items-center space-x-2">
+                                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                        <span class="text-sm ml-2">ScreenBalance Dashboard</span>
+                                    </div>
+                                    <img src="https://picsum.photos/id/1/600/400" alt="ScreenBalance Dashboard Preview" class="w-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                                        <div class="p-6 text-white">
+                                            <p class="font-medium text-lg">Your digital wellbeing at a glance</p>
+                                            <p class="text-sm opacity-80">Sign up to access your personalized dashboard</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="absolute -bottom-5 -right-5 bg-primary-light dark:bg-gray-800 p-4 rounded-lg shadow-lg flex flex-col items-center">
+                                    <div class="progress-circle">
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-2xl font-bold text-primary dark:text-blue-400">65%</span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-2 text-sm font-medium text-text-dark dark:text-white">Daily Goal</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools Overview Section -->
+            <div id="tool-overview" class="py-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold text-text-dark dark:text-white">Essential Tools for Digital Balance</h2>
+                        <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                            Our suite of tools helps you understand and improve your relationship with technology.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        <!-- Tool Card 1 -->
+                        <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                            <div class="tool-preview h-48">
+                                <img src="https://picsum.photos/id/180/600/400" alt="Screen Time Tracker" class="w-full h-full object-cover">
+                                <div class="tool-overlay">
+                                    <a href="signup.html" class="px-4 py-2 bg-white dark:bg-gray-800 text-primary dark:text-blue-400 rounded-md font-medium">
+                                        Try It Free
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-text-dark dark:text-white">Screen Time Tracker</h3>
+                                    <div class="bg-primary-light dark:bg-blue-900/30 w-10 h-10 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-chart-line text-primary dark:text-blue-400"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-3 text-gray-600 dark:text-gray-400">
+                                    Track app usage, device pickups, and notification counts with detailed analytics to understand your digital habits.
+                                </p>
+                                <div class="mt-4">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1 flex justify-between">
+                                        <span>Today's usage</span>
+                                        <span class="font-medium text-primary dark:text-blue-400">3h 25m</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="bg-primary h-2 rounded-full chart-bar" style="width: 65%;"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <a href="#tracker-details" class="text-primary dark:text-blue-400 font-medium flex items-center">
+                                        Learn more
+                                        <i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tool Card 2 -->
+                        <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                            <div class="tool-preview h-48">
+                                <img src="https://picsum.photos/id/119/600/400" alt="App Limits & Focus Mode" class="w-full h-full object-cover">
+                                <div class="tool-overlay">
+                                    <a href="signup.html" class="px-4 py-2 bg-white dark:bg-gray-800 text-primary dark:text-blue-400 rounded-md font-medium">
+                                        Try It Free
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-text-dark dark:text-white">App Limits & Focus Mode</h3>
+                                    <div class="bg-green-100 dark:bg-green-900/30 w-10 h-10 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-hourglass-half text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-3 text-gray-600 dark:text-gray-400">
+                                    Set custom time limits for apps and create distraction-free study sessions with our focus mode tools.
+                                </p>
+                                <div class="mt-4 grid grid-cols-3 gap-2">
+                                    <div class="text-center p-2 bg-primary-light dark:bg-gray-700 rounded-md">
+                                        <i class="fab fa-instagram text-pink-500 mb-1"></i>
+                                        <p class="text-xs text-gray-800 dark:text-gray-200">45m left</p>
+                                    </div>
+                                    <div class="text-center p-2 bg-primary-light dark:bg-gray-700 rounded-md">
+                                        <i class="fab fa-tiktok text-gray-800 dark:text-gray-200 mb-1"></i>
+                                        <p class="text-xs text-gray-800 dark:text-gray-200">30m left</p>
+                                    </div>
+                                    <div class="text-center p-2 bg-primary-light dark:bg-gray-700 rounded-md">
+                                        <i class="fas fa-gamepad text-indigo-500 mb-1"></i>
+                                        <p class="text-xs text-gray-800 dark:text-gray-200">1h left</p>
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <a href="#limits-details" class="text-primary dark:text-blue-400 font-medium flex items-center">
+                                        Learn more
+                                        <i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tool Card 3 -->
+                        <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                            <div class="tool-preview h-48">
+                                <img src="https://picsum.photos/id/96/600/400" alt="Goal Setting & Challenges" class="w-full h-full object-cover">
+                                <div class="tool-overlay">
+                                    <a href="signup.html" class="px-4 py-2 bg-white dark:bg-gray-800 text-primary dark:text-blue-400 rounded-md font-medium">
+                                        Try It Free
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-text-dark dark:text-white">Goal Setting & Challenges</h3>
+                                    <div class="bg-orange-100 dark:bg-orange-900/30 w-10 h-10 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-trophy text-orange-500 dark:text-orange-400"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-3 text-gray-600 dark:text-gray-400">
+                                    Set personalized screen time goals and participate in challenges to build healthier digital habits.
+                                </p>
+                                <div class="mt-4">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-text-dark dark:text-white">Digital Detox Challenge</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Day 5 of 7 completed</p>
+                                        </div>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
+                                        <div class="bg-accent-green h-2 rounded-full chart-bar" style="width: 71%;"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <a href="#goals-details" class="text-primary dark:text-blue-400 font-medium flex items-center">
+                                        Learn more
+                                        <i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tool Card 4 -->
+                        <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                            <div class="tool-preview h-48">
+                                <img src="https://picsum.photos/id/366/600/400" alt="Focus Training Exercises" class="w-full h-full object-cover">
+                                <div class="tool-overlay">
+                                    <a href="signup.html" class="px-4 py-2 bg-white dark:bg-gray-800 text-primary dark:text-blue-400 rounded-md font-medium">
+                                        Try It Free
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-text-dark dark:text-white">Focus Training Exercises</h3>
+                                    <div class="bg-purple-100 dark:bg-purple-900/30 w-10 h-10 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-brain text-purple-600 dark:text-purple-400"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-3 text-gray-600 dark:text-gray-400">
+                                    Interactive exercises to improve concentration and reduce digital distraction, enhancing study efficiency.
+                                </p>
+                                <div class="mt-4 flex items-center space-x-3">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-sm font-medium text-text-dark dark:text-white">3</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Level</span>
+                                    </div>
+                                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="bg-purple-600 h-2 rounded-full chart-bar" style="width: 60%;"></div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-sm font-medium text-text-dark dark:text-white">4</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Next</span>
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <a href="#focus-details" class="text-primary dark:text-blue-400 font-medium flex items-center">
+                                        Learn more
+                                        <i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tool Card 5 -->
+                        <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                            <div class="tool-preview h-48">
+                                <img src="https://picsum.photos/id/42/600/400" alt="Digital Wellbeing Planner" class="w-full h-full object-cover">
+                                <div class="tool-overlay">
+                                    <a href="signup.html" class="px-4 py-2 bg-white dark:bg-gray-800 text-primary dark:text-blue-400 rounded-md font-medium">
+                                        Try It Free
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-text-dark dark:text-white">Digital Wellbeing Planner</h3>
+                                    <div class="bg-cyan-100 dark:bg-cyan-900/30 w-10 h-10 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-calendar-check text-cyan-600 dark:text-cyan-400"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-3 text-gray-600 dark:text-gray-400">
+                                    Create balanced daily and weekly schedules that integrate screen time, study periods, and offline activities.
+                                </p>
+                                <div class="mt-4 grid grid-cols-4 gap-1 text-center">
+                                    <div class="p-2 bg-accent-green/20 dark:bg-green-900/30 rounded">
+                                        <span class="text-xs font-medium text-accent-green dark:text-green-400">M</span>
+                                    </div>
+                                    <div class="p-2 bg-accent-green/20 dark:bg-green-900/30 rounded">
+                                        <span class="text-xs font-medium text-accent-green dark:text-green-400">T</span>
+                                    </div>
+                                    <div class="p-2 bg-accent-green/20 dark:bg-green-900/30 rounded">
+                                        <span class="text-xs font-medium text-accent-green dark:text-green-400">W</span>
+                                    </div>
+                                    <div class="p-2 bg-primary/20 dark:bg-blue-900/30 rounded">
+                                        <span class="text-xs font-medium text-primary dark:text-blue-400">T</span>
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <a href="#planner-details" class="text-primary dark:text-blue-400 font-medium flex items-center">
+                                        Learn more
+                                        <i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tool Card 6 -->
+                        <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                            <div class="tool-preview h-48">
+                                <img src="https://picsum.photos/id/21/600/400" alt="Progress Insights" class="w-full h-full object-cover">
+                                <div class="tool-overlay">
+                                    <a href="signup.html" class="px-4 py-2 bg-white dark:bg-gray-800 text-primary dark:text-blue-400 rounded-md font-medium">
+                                        Try It Free
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-text-dark dark:text-white">Progress Insights</h3>
+                                    <div class="bg-red-100 dark:bg-red-900/30 w-10 h-10 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-chart-bar text-red-600 dark:text-red-400"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-3 text-gray-600 dark:text-gray-400">
+                                    Personalized insights and recommendations based on your usage patterns and goal progress.
+                                </p>
+                                <div class="mt-4">
+                                    <div class="p-2 bg-primary-light dark:bg-gray-700 rounded-lg">
+                                        <p class="text-xs font-medium text-text-dark dark:text-white"><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> Insight: Your productivity increases by 30% on days when you use social media less than 1 hour.</p>
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <a href="#insights-details" class="text-primary dark:text-blue-400 font-medium flex items-center">
+                                        Learn more
+                                        <i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Comparison Section -->
+            <div class="py-16 bg-primary-light dark:bg-gray-800">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-text-dark dark:text-white">Choose Your Plan</h2>
+                        <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                            We offer both free and premium options to support your digital wellbeing journey.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Free Plan -->
+                        <div class="pricing-card bg-white dark:bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+                            <div class="p-8">
+                                <h3 class="text-2xl font-bold text-text-dark dark:text-white mb-4">Free</h3>
+                                <div class="text-4xl font-bold text-text-dark dark:text-white mb-4">
+                                    $0
+                                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">/month</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                    Perfect for students just starting their digital balance journey.
+                                </p>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Basic Screen Time Tracking</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">App Usage Reports</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Simple App Limits</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Basic Focus Mode</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Weekly Summary Reports</span>
+                                    </li>
+                                </ul>
+                                <a href="signup.html" class="block w-full text-center px-6 py-3 border border-primary text-primary dark:text-blue-400 font-medium rounded-md hover:bg-primary-light dark:hover:bg-blue-900/20">
+                                    Get Started
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Premium Plan -->
+                        <div class="pricing-card bg-white dark:bg-gray-700 rounded-2xl shadow-lg overflow-hidden relative transform scale-105 md:scale-110 z-10">
+                            <div class="premium-badge">
+                                Popular
+                            </div>
+                            <div class="p-8">
+                                <h3 class="text-2xl font-bold text-text-dark dark:text-white mb-4">Premium</h3>
+                                <div class="text-4xl font-bold text-text-dark dark:text-white mb-4">
+                                    $3.99
+                                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">/month</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                    Advanced features for serious digital wellbeing improvement.
+                                </p>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">All Free Features</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Advanced Analytics & Insights</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Custom App Grouping & Schedules</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Enhanced Focus Mode & Training</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Family Integration</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Priority Support</span>
+                                    </li>
+                                </ul>
+                                <a href="signup.html" class="block w-full text-center px-6 py-3 border border-transparent bg-primary text-white font-medium rounded-md hover:bg-blue-700">
+                                    Start Free Trial
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- School Plan -->
+                        <div class="pricing-card bg-white dark:bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+                            <div class="p-8">
+                                <h3 class="text-2xl font-bold text-text-dark dark:text-white mb-4">School</h3>
+                                <div class="text-4xl font-bold text-text-dark dark:text-white mb-4">
+                                    Custom
+                                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">/year</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                    For schools wanting to help students develop healthy digital habits.
+                                </p>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">All Premium Features</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Dedicated School Dashboard</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Teacher Management Tools</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Curriculum Integration</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                        <span class="text-gray-600 dark:text-gray-300">Annual Usage Reports</span>
+                                    </li>
+                                </ul>
+                                <a href="contact.html" class="block w-full text-center px-6 py-3 border border-primary text-primary dark:text-blue-400 font-medium rounded-md hover:bg-primary-light dark:hover:bg-blue-900/20">
+                                    Contact Us
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Tool Highlight - Screen Time Tracker -->
+            <div id="tracker-details" class="py-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="md:flex md:items-center md:gap-12">
+                        <div class="md:w-1/2 mb-8 md:mb-0">
+                            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+                                <div class="p-3 bg-primary dark:bg-gray-700 text-white flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <span class="text-sm ml-2">Screen Time Analytics</span>
+                                </div>
+                                <img src="https://picsum.photos/id/239/800/600" alt="Screen Time Tracker Detail" class="w-full object-cover">
+                            </div>
+                        </div>
+                        <div class="md:w-1/2">
+                            <div class="bg-primary-light dark:bg-gray-900/50 p-8 rounded-2xl">
+                                <div class="bg-primary/20 dark:bg-blue-900/30 w-12 h-12 rounded-full flex items-center justify-center mb-6">
+                                    <i class="fas fa-chart-line text-primary dark:text-blue-400 text-xl"></i>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-bold text-text-dark dark:text-white mb-4">
+                                    Understand Your Digital Life
+                                </h2>
+                                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                    Our comprehensive Screen Time Tracker gives you detailed insights into how you use your devices. With colorful visualizations and detailed breakdowns, you'll gain a clear understanding of your digital habits.
+                                </p>
+                                <div class="space-y-4 mb-8">
+                                    <div class="flex items-start">
+                                        <div class="bg-white dark:bg-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-primary dark:text-blue-400 mt-1 mr-4 shrink-0">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-medium text-text-dark dark:text-white">App Usage Analysis</h3>
+                                            <p class="text-gray-600 dark:text-gray-400">See exactly how much time you spend on each app, with daily, weekly, and monthly trends.</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="bg-white dark:bg-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-primary dark:text-blue-400 mt-1 mr-4 shrink-0">
+                                            <i class="fas fa-bell"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-medium text-text-dark dark:text-white">Notification Tracking</h3>
+                                            <p class="text-gray-600 dark:text-gray-400">Identify which apps are constantly demanding your attention through notifications.</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="bg-white dark:bg-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-primary dark:text-blue-400 mt-1 mr-4 shrink-0">
+                                            <i class="fas fa-hand-pointer"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-medium text-text-dark dark:text-white">Pickup Counter</h3>
+                                            <p class="text-gray-600 dark:text-gray-400">Track how often you check your phone and identify patterns of digital distraction.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <blockquote class="border-l-4 border-primary dark:border-blue-400 pl-4 italic text-gray-600 dark:text-gray-400 mb-8">
+                                    "I never realized I was picking up my phone over 100 times a day until I started using the Screen Time Tracker. That awareness alone helped me cut my usage in half."
+                                    <footer class="mt-2 text-sm font-medium text-text-dark dark:text-white">— Sophia, 16</footer>
+                                </blockquote>
+                                <a href="signup.html" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    Start Tracking Your Time
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonials Section -->
+            <div class="py-16 bg-white dark:bg-gray-800">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-text-dark dark:text-white">What Students Are Saying</h2>
+                        <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                            Our tools have helped thousands of students improve their relationship with technology.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Testimonial 1 -->
+                        <div class="bg-primary-light dark:bg-gray-700 rounded-xl p-8 relative">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                                    <img src="https://picsum.photos/id/64/100/100" alt="Student portrait" class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Emily Chen</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">High School Junior</p>
+                                </div>
+                                <div class="ml-auto text-2xl text-primary dark:text-blue-400">
+                                    <i class="fas fa-quote-right"></i>
+                                </div>
+                            </div>
+                            <p class="text-text-body dark:text-gray-300 mb-6">
+                                "The Focus Training tool has completely changed how I study. I used to get distracted every few minutes, but now I can focus for over an hour at a time. My test scores have gone up significantly!"
+                            </p>
+                            <div class="flex">
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                            </div>
+                        </div>
+
+                        <!-- Testimonial 2 -->
+                        <div class="bg-primary-light dark:bg-gray-700 rounded-xl p-8 relative">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                                    <img src="https://picsum.photos/id/91/100/100" alt="Student portrait" class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Jason Rodriguez</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">10th Grade Student</p>
+                                </div>
+                                <div class="ml-auto text-2xl text-primary dark:text-blue-400">
+                                    <i class="fas fa-quote-right"></i>
+                                </div>
+                            </div>
+                            <p class="text-text-body dark:text-gray-300 mb-6">
+                                "As a gamer, the App Limits feature has been a game-changer for me. I can still enjoy gaming but now I don't let it take over my entire day. I've found a much better balance."
+                            </p>
+                            <div class="flex">
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star-half-alt text-yellow-500"></i>
+                            </div>
+                        </div>
+
+                        <!-- Testimonial 3 -->
+                        <div class="bg-primary-light dark:bg-gray-700 rounded-xl p-8 relative">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                                    <img src="https://picsum.photos/id/342/100/100" alt="Student portrait" class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Aisha Patel</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">12th Grade Student</p>
+                                </div>
+                                <div class="ml-auto text-2xl text-primary dark:text-blue-400">
+                                    <i class="fas fa-quote-right"></i>
+                                </div>
+                            </div>
+                            <p class="text-text-body dark:text-gray-300 mb-6">
+                                "The Digital Wellbeing Planner helped me organize my time during college applications. I was able to balance schoolwork, applications, and still have time to relax without feeling guilty."
+                            </p>
+                            <div class="flex">
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <i class="fas fa-star text-yellow-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="py-16 bg-primary dark:bg-gray-900">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 class="text-3xl font-bold text-white mb-4">Ready to Take Control of Your Digital Life?</h2>
+                    <p class="text-xl text-blue-100 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+                        Join thousands of students who have transformed their relationship with technology and improved their academic performance.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                        <a href="signup.html" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-primary bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                            Sign Up Free
+                        </a>
+                        <a href="stories.html" class="inline-flex items-center justify-center px-8 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                            Read Success Stories
+                        </a>
+                    </div>
+                    <p class="mt-6 text-sm text-blue-200 dark:text-gray-400">
+                        No credit card required. Start with our free plan and upgrade anytime.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="py-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-text-dark dark:text-white">Frequently Asked Questions</h2>
+                        <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                            Everything you need to know about our tools and how they work.
+                        </p>
+                    </div>
+
+                    <div class="max-w-3xl mx-auto space-y-6">
+                        <!-- FAQ Item 1 -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white">How do I get started with ScreenBalance?</h3>
+                                <i class="fas fa-chevron-down text-primary dark:text-blue-400"></i>
+                            </button>
+                            <div class="mt-4">
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    Getting started is easy! Simply sign up for a free account, and you'll be guided through the setup process. You'll need to install our app on your devices and grant the necessary permissions for tracking screen time. Our onboarding process will walk you through each step.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 2 -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white">Will ScreenBalance work with all my devices?</h3>
+                                <i class="fas fa-chevron-down text-primary dark:text-blue-400"></i>
+                            </button>
+                            <div class="mt-4">
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    ScreenBalance is compatible with iOS and Android mobile devices, as well as Windows and Mac computers. Our cross-platform sync feature ensures that your data is combined across all devices for a complete picture of your screen time.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 3 -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white">Is my data private and secure?</h3>
+                                <i class="fas fa-chevron-down text-primary dark:text-blue-400"></i>
+                            </button>
+                            <div class="mt-4">
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    Absolutely. We take privacy extremely seriously. Your screen time data is encrypted and stored securely. We never sell your data to third parties, and you have complete control over your information. Parents can only access their child's data with proper consent and setup.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 4 -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white">Can I cancel my premium subscription anytime?</h3>
+                                <i class="fas fa-chevron-down text-primary dark:text-blue-400"></i>
+                            </button>
+                            <div class="mt-4">
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    Yes, you can cancel your premium subscription at any time. Your premium features will remain active until the end of your billing cycle. After cancellation, your account will automatically switch to the free plan, and you'll retain all your historical data.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 5 -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white">Do you offer support if I need help?</h3>
+                                <i class="fas fa-chevron-down text-primary dark:text-blue-400"></i>
+                            </button>
+                            <div class="mt-4">
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    We provide email support for all users. Premium users receive priority support with faster response times. We also have an extensive knowledge base and video tutorials to help you make the most of ScreenBalance's features.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+                <div class="md:flex md:items-center md:justify-between">
+                    <div class="flex justify-center md:justify-start space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">Facebook</span>
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">Instagram</span>
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">Twitter</span>
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">YouTube</span>
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
+                    </div>
+                    <div class="mt-8 md:mt-0">
+                        <p class="text-center md:text-right text-sm text-gray-500 dark:text-gray-400">
+                            &copy; 2023 ScreenBalance. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 md:flex md:items-center md:justify-between">
+                    <div class="flex space-x-6 md:order-2">
+                        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300">Privacy Policy</a>
+                        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300">Terms of Service</a>
+                        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300">Contact Us</a>
+                    </div>
+                    <p class="mt-8 text-sm text-gray-500 dark:text-gray-400 md:mt-0 md:order-1">
+                        Helping students develop healthier digital habits.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Animate chart bars on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartBars = document.querySelectorAll('.chart-bar');
+            chartBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 300);
+            });
+        });
+
+        // Simple toggle for FAQ items
+        document.querySelectorAll('.bg-white.dark\\:bg-gray-800.rounded-lg button').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenBalance | Resources</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6', // deeper blue
+                        'primary-light': '#f0f7ff', // pale blue
+                        'text-dark': '#1e3a8a', // navy blue
+                        'text-body': '#333333', // dark gray
+                        'accent-green': '#65a30d', // lime green
+                        'accent-orange': '#f97316', // orange
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        /* Custom CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        .resource-card {
+            transition: all 0.3s ease;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .tag {
+            transition: all 0.2s ease;
+        }
+        
+        .tag:hover {
+            transform: scale(1.05);
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .video-thumbnail:hover {
+            transform: scale(1.02);
+        }
+        
+        .video-thumbnail::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .video-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-40%, -50%);
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 15px solid #3b82f6;
+            z-index: 1;
+        }
+        
+        .dark .video-thumbnail::after {
+            background-color: rgba(30, 41, 59, 0.8);
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: #374151;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dark mode styles */
+        .dark body {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+        .dark .bg-primary-light {
+            background-color: #1e293b;
+        }
+        .dark .text-text-body {
+            color: #d1d5db;
+        }
+        .dark .text-text-dark {
+            color: #e5e7eb;
+        }
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+        .dark .shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="font-sans bg-primary-light dark:bg-gray-900 text-text-body min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <!-- Logo -->
+                        <div class="flex-shrink-0 flex items-center">
+                            <div class="text-primary dark:text-blue-400 text-2xl font-bold">
+                                <i class="fas fa-balance-scale-right mr-2"></i>
+                                ScreenBalance
+                            </div>
+                        </div>
+                        <!-- Desktop Navigation Links -->
+                        <div class="hidden md:ml-6 md:flex md:space-x-8">
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Dashboard</a>
+                            <a href="#" class="border-b-2 border-primary text-text-dark dark:text-white font-medium text-base px-1 pt-1">Resources</a>
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Tools</a>
+                            <a href="#" id="history-link" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">History</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <!-- Search Box (Desktop) -->
+                        <div class="hidden md:block mr-4">
+                            <div class="relative">
+                                <input type="text" placeholder="Search resources..." class="w-64 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-sm">
+                                <button class="absolute right-3 top-2.5 text-gray-400 dark:text-gray-400">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- User Menu -->
+                        <div class="ml-3 relative">
+                            <div>
+                                <button id="user-menu-button" class="bg-white dark:bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <span class="sr-only">Open user menu</span>
+                                    <div class="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                        <span id="user-initials">JS</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-user mr-2"></i> Your Profile
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-cog mr-2"></i> Settings
+                                </a>
+                                <a href="#" id="signout-button" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Sign out
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile menu button -->
+                        <div class="flex md:hidden ml-4">
+                            <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-text-dark dark:text-gray-400 hover:text-primary hover:bg-primary-light dark:hover:bg-gray-700 focus:outline-none">
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                    <a href="#" class="bg-primary-light dark:bg-gray-900 text-primary dark:text-white block px-3 py-2 rounded-md text-base font-medium">Resources</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Tools</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">History</a>
+                </div>
+                
+                <!-- Mobile Search Box -->
+                <div class="px-2 pt-2 pb-3 border-t border-gray-200 dark:border-gray-700">
+                    <div class="relative">
+                        <input type="text" placeholder="Search resources..." class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-sm">
+                        <button class="absolute right-3 top-2.5 text-gray-400 dark:text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center px-5">
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                                <span id="mobile-user-initials">JS</span>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div id="mobile-user-name" class="text-base font-medium leading-none text-text-dark dark:text-white">John Smith</div>
+                            <div id="mobile-user-email" class="text-sm font-medium leading-none text-gray-500 dark:text-gray-400 mt-1">john.smith@example.com</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 px-2 space-y-1">
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Your Profile</a>
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Settings</a>
+                        <a href="#" id="mobile-signout-button" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <!-- Page Header -->
+            <div class="bg-primary dark:bg-gray-800 py-6">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h1 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-book-open mr-3"></i>
+                        Resources
+                    </h1>
+                    <p class="mt-1 text-sm text-blue-100 dark:text-gray-300">
+                        Guides, tools, and support to help you maintain a healthy digital balance
+                    </p>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <!-- Featured Resource -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden mb-8">
+                    <div class="md:flex">
+                        <div class="md:flex-shrink-0 md:w-1/3">
+                            <div class="h-48 md:h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                <img src="https://picsum.photos/id/20/600/400" alt="Featured resource" class="object-cover h-full w-full">
+                            </div>
+                        </div>
+                        <div class="p-6 md:w-2/3">
+                            <div class="flex items-center">
+                                <span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 px-2 py-1 text-xs rounded-full">Featured</span>
+                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">Last updated: Oct 12, 2023</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-text-dark dark:text-white mt-2">The Digital Detox Challenge: 7 Days to Healthier Habits</h2>
+                            <p class="mt-2 text-gray-600 dark:text-gray-300">
+                                Our most popular guided challenge helps you reset your relationship with technology and establish sustainable screen time habits. Complete daily tasks, track your progress, and see real improvements in just one week.
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full text-xs">Beginner Friendly</span>
+                                <span class="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full text-xs">Interactive</span>
+                                <span class="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full text-xs">Most Popular</span>
+                            </div>
+                            <div class="mt-6">
+                                <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    Start Challenge
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resource Categories and Content -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Sidebar: Categories & Filters -->
+                    <div class="md:col-span-1">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 mb-6">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">Categories</h3>
+                            <ul class="space-y-2">
+                                <li>
+                                    <a href="#" class="flex items-center text-primary dark:text-blue-400 font-medium">
+                                        <i class="fas fa-book mr-2 w-5 text-center"></i>
+                                        <span>Guides & Articles</span>
+                                        <span class="ml-auto bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 text-xs rounded-full">14</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="flex items-center text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400">
+                                        <i class="fas fa-file-download mr-2 w-5 text-center"></i>
+                                        <span>Worksheets & Planners</span>
+                                        <span class="ml-auto bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 text-xs rounded-full">8</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="flex items-center text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400">
+                                        <i class="fas fa-video mr-2 w-5 text-center"></i>
+                                        <span>Video Tutorials</span>
+                                        <span class="ml-auto bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 text-xs rounded-full">6</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="flex items-center text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400">
+                                        <i class="fas fa-tools mr-2 w-5 text-center"></i>
+                                        <span>Interactive Tools</span>
+                                        <span class="ml-auto bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 text-xs rounded-full">5</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="flex items-center text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400">
+                                        <i class="fas fa-users mr-2 w-5 text-center"></i>
+                                        <span>Community Resources</span>
+                                        <span class="ml-auto bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 text-xs rounded-full">7</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 mb-6">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">Popular Tags</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="#" class="tag px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full text-xs hover:bg-blue-200 dark:hover:bg-blue-800">Social Media</a>
+                                <a href="#" class="tag px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full text-xs hover:bg-green-200 dark:hover:bg-green-800">Focus</a>
+                                <a href="#" class="tag px-3 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full text-xs hover:bg-purple-200 dark:hover:bg-purple-800">Sleep</a>
+                                <a href="#" class="tag px-3 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 rounded-full text-xs hover:bg-yellow-200 dark:hover:bg-yellow-800">Study Habits</a>
+                                <a href="#" class="tag px-3 py-1 bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300 rounded-full text-xs hover:bg-pink-200 dark:hover:bg-pink-800">Mental Health</a>
+                                <a href="#" class="tag px-3 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 rounded-full text-xs hover:bg-red-200 dark:hover:bg-red-800">Productivity</a>
+                                <a href="#" class="tag px-3 py-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 rounded-full text-xs hover:bg-indigo-200 dark:hover:bg-indigo-800">Gaming</a>
+                                <a href="#" class="tag px-3 py-1 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 rounded-full text-xs hover:bg-gray-200 dark:hover:bg-gray-600">Notifications</a>
+                            </div>
+                        </div>
+
+                        <div class="bg-primary-light dark:bg-gray-700 rounded-lg shadow-sm p-5">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-2">Need Help?</h3>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                Can't find what you're looking for? Our support team is here to help you find the right resources.
+                            </p>
+                            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                Contact Support
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Main Content: Resource Listings -->
+                    <div class="md:col-span-3">
+                        <!-- Guides & Articles Section -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-text-dark dark:text-white">Guides & Articles</h2>
+                                <a href="#" class="text-sm text-primary dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center">
+                                    View all
+                                    <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Article 1 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <img src="https://picsum.photos/id/96/400/200" alt="Setting boundaries" class="w-full h-40 object-cover">
+                                    <div class="p-4">
+                                        <span class="inline-block px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full text-xs">Focus</span>
+                                        <h3 class="mt-2 text-lg font-medium text-text-dark dark:text-white">Setting Digital Boundaries</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                                            Learn how to create healthy boundaries with technology and communicate them effectively to friends and family.
+                                        </p>
+                                        <div class="mt-4 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">5 min read</span>
+                                            <a href="#" class="text-primary dark:text-blue-400 text-sm hover:text-blue-700 dark:hover:text-blue-300">Read more</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Article 2 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <img src="https://picsum.photos/id/119/400/200" alt="Sleep and screens" class="w-full h-40 object-cover">
+                                    <div class="p-4">
+                                        <span class="inline-block px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full text-xs">Sleep</span>
+                                        <h3 class="mt-2 text-lg font-medium text-text-dark dark:text-white">How Screens Affect Your Sleep</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                                            Discover the science behind blue light's impact on sleep and practical tips for better nighttime habits.
+                                        </p>
+                                        <div class="mt-4 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">8 min read</span>
+                                            <a href="#" class="text-primary dark:text-blue-400 text-sm hover:text-blue-700 dark:hover:text-blue-300">Read more</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Article 3 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <img src="https://picsum.photos/id/180/400/200" alt="Social media mindfulness" class="w-full h-40 object-cover">
+                                    <div class="p-4">
+                                        <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full text-xs">Social Media</span>
+                                        <h3 class="mt-2 text-lg font-medium text-text-dark dark:text-white">Mindful Social Media Usage</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                                            Turn passive scrolling into intentional engagement with these mindfulness techniques for social media.
+                                        </p>
+                                        <div class="mt-4 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">6 min read</span>
+                                            <a href="#" class="text-primary dark:text-blue-400 text-sm hover:text-blue-700 dark:hover:text-blue-300">Read more</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Worksheets & Planners Section -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-text-dark dark:text-white">Worksheets & Planners</h2>
+                                <a href="#" class="text-sm text-primary dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center">
+                                    View all
+                                    <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Worksheet 1 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="p-5">
+                                        <div class="flex items-center justify-between">
+                                            <span class="inline-block px-2 py-1 bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300 rounded-full text-xs">Worksheet</span>
+                                            <i class="fas fa-file-pdf text-2xl text-red-500 dark:text-red-400"></i>
+                                        </div>
+                                        <h3 class="mt-3 text-lg font-medium text-text-dark dark:text-white">Screen Time Audit Worksheet</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                            Track and analyze your current screen habits with this comprehensive worksheet. Identify patterns and areas for improvement.
+                                        </p>
+                                        <div class="mt-4 flex items-center">
+                                            <div class="flex -space-x-2">
+                                                <div class="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-xs text-green-800">
+                                                    <i class="fas fa-print"></i>
+                                                </div>
+                                                <div class="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-xs text-blue-800">
+                                                    <i class="fas fa-pen"></i>
+                                                </div>
+                                            </div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">Printable & Fillable PDF</span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 focus:outline-none">
+                                                <i class="fas fa-download mr-2"></i>
+                                                Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Worksheet 2 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="p-5">
+                                        <div class="flex items-center justify-between">
+                                            <span class="inline-block px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full text-xs">Planner</span>
+                                            <i class="fas fa-file-excel text-2xl text-green-500 dark:text-green-400"></i>
+                                        </div>
+                                        <h3 class="mt-3 text-lg font-medium text-text-dark dark:text-white">Weekly Digital Wellbeing Planner</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                            Plan your screen time, offline activities, and study sessions with this weekly planner designed to help you maintain balance.
+                                        </p>
+                                        <div class="mt-4 flex items-center">
+                                            <div class="flex -space-x-2">
+                                                <div class="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-xs text-green-800">
+                                                    <i class="fas fa-print"></i>
+                                                </div>
+                                                <div class="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-xs text-blue-800">
+                                                    <i class="fas fa-pen"></i>
+                                                </div>
+                                                <div class="h-6 w-6 rounded-full bg-yellow-100 flex items-center justify-center text-xs text-yellow-800">
+                                                    <i class="fas fa-desktop"></i>
+                                                </div>
+                                            </div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">Printable, Fillable & Spreadsheet</span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 focus:outline-none">
+                                                <i class="fas fa-download mr-2"></i>
+                                                Download Planner
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video Tutorials Section -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-text-dark dark:text-white">Video Tutorials</h2>
+                                <a href="#" class="text-sm text-primary dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center">
+                                    View all
+                                    <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Video 1 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="video-thumbnail">
+                                        <img src="https://picsum.photos/id/160/500/300" alt="Configure app limits" class="w-full h-52 object-cover">
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="text-lg font-medium text-text-dark dark:text-white">How to Configure App Limits on Your Phone</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                                            A step-by-step tutorial on setting up effective app limits and screen time controls on both Android and iOS devices.
+                                        </p>
+                                        <div class="mt-4 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">6:42 • 3.5k views</span>
+                                            <a href="#" class="text-primary dark:text-blue-400 text-sm hover:text-blue-700 dark:hover:text-blue-300">Watch video</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Video 2 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="video-thumbnail">
+                                        <img src="https://picsum.photos/id/239/500/300" alt="Create phone-free zones" class="w-full h-52 object-cover">
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="text-lg font-medium text-text-dark dark:text-white">Creating Phone-Free Zones at Home</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                                            Tips for establishing tech-free spaces in your home to improve focus, sleep, and family connections.
+                                        </p>
+                                        <div class="mt-4 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">8:15 • 2.1k views</span>
+                                            <a href="#" class="text-primary dark:text-blue-400 text-sm hover:text-blue-700 dark:hover:text-blue-300">Watch video</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Tools Section -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-text-dark dark:text-white">Interactive Tools</h2>
+                                <a href="#" class="text-sm text-primary dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center">
+                                    View all
+                                    <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Tool 1 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="p-5 flex flex-col items-center">
+                                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
+                                            <i class="fas fa-calculator text-2xl text-primary dark:text-blue-400"></i>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-text-dark dark:text-white text-center">Screen Time Calculator</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 text-center">
+                                            Calculate how much of your life you spend on different apps and what you could do with that time instead.
+                                        </p>
+                                        <div class="mt-4">
+                                            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                                Use Calculator
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tool 2 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="p-5 flex flex-col items-center">
+                                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
+                                            <i class="fas fa-tasks text-2xl text-green-600 dark:text-green-400"></i>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-text-dark dark:text-white text-center">Habit Tracker</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 text-center">
+                                            Track your digital habits and build positive routines with this interactive habit formation tool.
+                                        </p>
+                                        <div class="mt-4">
+                                            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-accent-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green">
+                                                Start Tracking
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tool 3 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="p-5 flex flex-col items-center">
+                                        <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-4">
+                                            <i class="fas fa-brain text-2xl text-purple-600 dark:text-purple-400"></i>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-text-dark dark:text-white text-center">Focus Trainer</h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 text-center">
+                                            Build your concentration skills with exercises designed to improve focus and reduce digital distraction.
+                                        </p>
+                                        <div class="mt-4">
+                                            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                                Train Now
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Community Stories Section -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-text-dark dark:text-white">Community Stories</h2>
+                                <a href="#" class="text-sm text-primary dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center">
+                                    View all
+                                    <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6">
+                                <!-- Story 1 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="md:flex">
+                                        <div class="md:flex-shrink-0 w-full md:w-48 flex items-center justify-center p-6">
+                                            <div class="h-32 w-32 rounded-full overflow-hidden border-4 border-primary-light dark:border-gray-700">
+                                                <img src="https://picsum.photos/id/237/200" alt="Emily's profile" class="h-full w-full object-cover">
+                                            </div>
+                                        </div>
+                                        <div class="p-6 md:flex-1">
+                                            <h3 class="text-lg font-medium text-text-dark dark:text-white">Emily's Journey: From 8 Hours to 3</h3>
+                                            <p class="mt-2 text-gray-600 dark:text-gray-300">
+                                                "I used to spend over 8 hours a day on my phone, mostly on social media. My grades were suffering and I was always tired. Using the techniques I learned here, I've cut my screen time to under 3 hours daily, and my life has completely changed..."
+                                            </p>
+                                            <div class="mt-4 flex flex-wrap gap-2">
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full text-xs">Social Media</span>
+                                                <span class="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full text-xs">Sleep</span>
+                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 rounded-full text-xs">Study Habits</span>
+                                            </div>
+                                            <div class="mt-6">
+                                                <a href="#" class="text-primary dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300">
+                                                    Read full story <i class="fas fa-arrow-right ml-1"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Story 2 -->
+                                <div class="resource-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                    <div class="md:flex">
+                                        <div class="md:flex-shrink-0 w-full md:w-48 flex items-center justify-center p-6">
+                                            <div class="h-32 w-32 rounded-full overflow-hidden border-4 border-primary-light dark:border-gray-700">
+                                                <img src="https://picsum.photos/id/177/200" alt="Jason's profile" class="h-full w-full object-cover">
+                                            </div>
+                                        </div>
+                                        <div class="p-6 md:flex-1">
+                                            <h3 class="text-lg font-medium text-text-dark dark:text-white">Jason: Balancing Gaming and Academic Success</h3>
+                                            <p class="mt-2 text-gray-600 dark:text-gray-300">
+                                                "As an avid gamer, I struggled to balance my passion with schoolwork. I was playing 6+ hours daily and my grades were dropping. The structured approach from ScreenBalance helped me create a sustainable schedule where I still enjoy gaming but also excel in school..."
+                                            </p>
+                                            <div class="mt-4 flex flex-wrap gap-2">
+                                                <span class="px-2 py-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 rounded-full text-xs">Gaming</span>
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full text-xs">Focus</span>
+                                                <span class="px-2 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 rounded-full text-xs">Productivity</span>
+                                            </div>
+                                            <div class="mt-6">
+                                                <a href="#" class="text-primary dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300">
+                                                    Read full story <i class="fas fa-arrow-right ml-1"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recently Viewed Resources -->
+                <div class="mt-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-text-dark dark:text-white">Recently Viewed</h2>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 overflow-x-auto custom-scrollbar">
+                        <div class="flex space-x-4 min-w-max">
+                            <!-- Recent Item 1 -->
+                            <div class="flex-shrink-0 w-60 bg-primary-light dark:bg-gray-700 rounded-lg p-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-blue-100 dark:bg-blue-900 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-file-alt text-primary dark:text-blue-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-medium text-text-dark dark:text-white truncate">Digital Detox Challenge</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Viewed 2 days ago</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Item 2 -->
+                            <div class="flex-shrink-0 w-60 bg-primary-light dark:bg-gray-700 rounded-lg p-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-green-100 dark:bg-green-900 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-file-pdf text-red-500 dark:text-red-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-medium text-text-dark dark:text-white truncate">Weekly Digital Wellbeing Planner</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Viewed 3 days ago</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Item 3 -->
+                            <div class="flex-shrink-0 w-60 bg-primary-light dark:bg-gray-700 rounded-lg p-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-blue-100 dark:bg-blue-900 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-video text-blue-500 dark:text-blue-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-medium text-text-dark dark:text-white truncate">How to Configure App Limits</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Viewed 1 week ago</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Item 4 -->
+                            <div class="flex-shrink-0 w-60 bg-primary-light dark:bg-gray-700 rounded-lg p-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-purple-100 dark:bg-purple-900 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-book text-purple-500 dark:text-purple-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-medium text-text-dark dark:text-white truncate">Mindful Social Media Usage</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Viewed 2 weeks ago</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Item 5 -->
+                            <div class="flex-shrink-0 w-60 bg-primary-light dark:bg-gray-700 rounded-lg p-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-yellow-100 dark:bg-yellow-900 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-tasks text-yellow-500 dark:text-yellow-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-medium text-text-dark dark:text-white truncate">Habit Tracker</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Viewed 3 weeks ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div class="md:flex md:items-center md:justify-between">
+                    <div class="flex justify-center md:justify-start space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">Facebook</span>
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">Instagram</span>
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">Twitter</span>
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <span class="sr-only">YouTube</span>
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
+                    </div>
+                    <div class="mt-8 md:mt-0">
+                        <p class="text-center md:text-right text-sm text-gray-500 dark:text-gray-400">
+                            &copy; 2023 ScreenBalance. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 md:flex md:items-center md:justify-between">
+                    <div class="flex space-x-6 md:order-2">
+                        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300">Privacy Policy</a>
+                        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300">Terms of Service</a>
+                        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300">Contact Us</a>
+                    </div>
+                    <p class="mt-8 text-sm text-gray-500 dark:text-gray-400 md:mt-0 md:order-1">
+                        Helping students develop healthier digital habits.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('user-menu-button')?.addEventListener('click', function() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const button = document.getElementById('user-menu-button');
+            
+            if (dropdown && !dropdown.classList.contains('hidden') && !button?.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+        
+        // Set user initials
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInitials = document.getElementById('user-initials');
+            const mobileUserInitials = document.getElementById('mobile-user-initials');
+            const userName = document.getElementById('mobile-user-name');
+            const userEmail = document.getElementById('mobile-user-email');
+            
+            // In a real app, this would come from the user's session data
+            const firstName = 'John';
+            const lastName = 'Smith';
+            const email = 'john.smith@example.com';
+            
+            if (userInitials) userInitials.textContent = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+            if (mobileUserInitials) mobileUserInitials.textContent = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+            if (userName) userName.textContent = `${firstName} ${lastName}`;
+            if (userEmail) userEmail.textContent = email;
+        });
+        
+        // Sign out buttons
+        document.getElementById('signout-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            // In a real app, this would log the user out and redirect to the login page
+            alert('This would sign you out in a real application.');
+        });
+
+        document.getElementById('mobile-signout-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            // In a real app, this would log the user out and redirect to the login page
+            alert('This would sign you out in a real application.');
+        });
+    </script>
+
+    <!-- 
+    *** SERVER-SIDE CODE (PHP/SQL) ***
+    This section shows how the resources page would be implemented on a real server.
+    This code won't run in the Poe Canvas but demonstrates the structure.
+    
+    *** resources.php ***
+    <?php
+    session_start();
+    require_once 'database.php';
+
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: login.php');
+        exit;
+    }
+
+    $user_id = $_SESSION['user_id'];
+    $first_name = $_SESSION['first_name'];
+    $last_name = $_SESSION['last_name'];
+    
+    // Get search query if present
+    $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
+    
+    // Get category filter if present
+    $category_filter = isset($_GET['category']) ? $_GET['category'] : '';
+    
+    // Get tag filter if present
+    $tag_filter = isset($_GET['tag']) ? $_GET['tag'] : '';
+    
+    // Get resources based on filters
+    $resources_query = "
+        SELECT r.*, c.name as category_name, GROUP_CONCAT(t.name) as tags
+        FROM resources r
+        JOIN categories c ON r.category_id = c.id
+        LEFT JOIN resource_tags rt ON r.id = rt.resource_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+    ";
+    
+    $where_clauses = [];
+    $params = [];
+    
+    if (!empty($search_query)) {
+        $where_clauses[] = "(r.title LIKE ? OR r.description LIKE ?)";
+        $params[] = "%{$search_query}%";
+        $params[] = "%{$search_query}%";
+    }
+    
+    if (!empty($category_filter)) {
+        $where_clauses[] = "c.slug = ?";
+        $params[] = $category_filter;
+    }
+    
+    if (!empty($tag_filter)) {
+        $where_clauses[] = "t.slug = ?";
+        $params[] = $tag_filter;
+    }
+    
+    if (!empty($where_clauses)) {
+        $resources_query .= " WHERE " . implode(" AND ", $where_clauses);
+    }
+    
+    $resources_query .= " GROUP BY r.id ORDER BY r.is_featured DESC, r.created_at DESC";
+    
+    $stmt = $pdo->prepare($resources_query);
+    $stmt->execute($params);
+    $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get featured resource
+    $stmt = $pdo->prepare("
+        SELECT r.*, c.name as category_name, GROUP_CONCAT(t.name) as tags
+        FROM resources r
+        JOIN categories c ON r.category_id = c.id
+        LEFT JOIN resource_tags rt ON r.id = rt.resource_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+        WHERE r.is_featured = 1
+        GROUP BY r.id
+        LIMIT 1
+    ");
+    $stmt->execute();
+    $featured_resource = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Get all categories with counts
+    $stmt = $pdo->prepare("
+        SELECT c.*, COUNT(r.id) as resource_count
+        FROM categories c
+        LEFT JOIN resources r ON c.id = r.category_id
+        GROUP BY c.id
+        ORDER BY c.display_order
+    ");
+    $stmt->execute();
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get popular tags
+    $stmt = $pdo->prepare("
+        SELECT t.*, COUNT(rt.resource_id) as resource_count
+        FROM tags t
+        JOIN resource_tags rt ON t.id = rt.tag_id
+        GROUP BY t.id
+        ORDER BY resource_count DESC
+        LIMIT 10
+    ");
+    $stmt->execute();
+    $popular_tags = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get recently viewed resources for the current user
+    $stmt = $pdo->prepare("
+        SELECT r.*, rv.viewed_at
+        FROM resource_views rv
+        JOIN resources r ON rv.resource_id = r.id
+        WHERE rv.user_id = ?
+        ORDER BY rv.viewed_at DESC
+        LIMIT 5
+    ");
+    $stmt->execute([$user_id]);
+    $recently_viewed = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get guides & articles
+    $stmt = $pdo->prepare("
+        SELECT r.*, GROUP_CONCAT(t.name) as tags
+        FROM resources r
+        JOIN categories c ON r.category_id = c.id
+        LEFT JOIN resource_tags rt ON r.id = rt.resource_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+        WHERE c.slug = 'guides-articles'
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+        LIMIT 3
+    ");
+    $stmt->execute();
+    $guides_articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get worksheets & planners
+    $stmt = $pdo->prepare("
+        SELECT r.*, GROUP_CONCAT(t.name) as tags
+        FROM resources r
+        JOIN categories c ON r.category_id = c.id
+        LEFT JOIN resource_tags rt ON r.id = rt.resource_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+        WHERE c.slug = 'worksheets-planners'
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+        LIMIT 2
+    ");
+    $stmt->execute();
+    $worksheets_planners = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get video tutorials
+    $stmt = $pdo->prepare("
+        SELECT r.*, GROUP_CONCAT(t.name) as tags
+        FROM resources r
+        JOIN categories c ON r.category_id = c.id
+        LEFT JOIN resource_tags rt ON r.id = rt.resource_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+        WHERE c.slug = 'video-tutorials'
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+        LIMIT 2
+    ");
+    $stmt->execute();
+    $video_tutorials = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get interactive tools
+    $stmt = $pdo->prepare("
+        SELECT r.*, GROUP_CONCAT(t.name) as tags
+        FROM resources r
+        JOIN categories c ON r.category_id = c.id
+        LEFT JOIN resource_tags rt ON r.id = rt.resource_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+        WHERE c.slug = 'interactive-tools'
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+        LIMIT 3
+    ");
+    $stmt->execute();
+    $interactive_tools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get community stories
+    $stmt = $pdo->prepare("
+        SELECT r.*, u.first_name, u.last_name, u.profile_image, GROUP_CONCAT(t.name) as tags
+        FROM resources r
+        JOIN categories c ON r.category_id = c.id
+        JOIN users u ON r.author_id = u.id
+        LEFT JOIN resource_tags rt ON r.id = rt.resource_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+        WHERE c.slug = 'community-stories'
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+        LIMIT 2
+    ");
+    $stmt->execute();
+    $community_stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ?>
+    
+    *** SQL Schema Additions for Resources Page ***
+    /* These would be added to the previous schema */
+    
+    /* Categories for resources */
+    CREATE TABLE categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(50) NOT NULL,
+        slug VARCHAR(50) NOT NULL UNIQUE,
+        description TEXT,
+        icon VARCHAR(50),
+        display_order INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    /* Tags for resources */
+    CREATE TABLE tags (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(50) NOT NULL,
+        slug VARCHAR(50) NOT NULL UNIQUE,
+        color VARCHAR(20),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    /* Resources table */
+    CREATE TABLE resources (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) NOT NULL UNIQUE,
+        description TEXT,
+        content LONGTEXT,
+        category_id INT NOT NULL,
+        resource_type ENUM('article', 'worksheet', 'video', 'tool', 'story') NOT NULL,
+        thumbnail VARCHAR(255),
+        file_url VARCHAR(255),
+        video_url VARCHAR(255),
+        external_url VARCHAR(255),
+        author_id INT,
+        is_featured BOOLEAN NOT NULL DEFAULT 0,
+        view_count INT NOT NULL DEFAULT 0,
+        download_count INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES categories(id),
+        FOREIGN KEY (author_id) REFERENCES users(id)
+    );
+    
+    /* Resource tags junction table */
+    CREATE TABLE resource_tags (
+        resource_id INT NOT NULL,
+        tag_id INT NOT NULL,
+        PRIMARY KEY (resource_id, tag_id),
+        FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+    );
+    
+    /* Resource views tracking */
+    CREATE TABLE resource_views (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        resource_id INT NOT NULL,
+        viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE,
+        UNIQUE KEY user_resource (user_id, resource_id)
+    );
+    
+    /* Resource downloads tracking */
+    CREATE TABLE resource_downloads (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        resource_id INT NOT NULL,
+        downloaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE
+    );
+    -->
+</body>
+</html>

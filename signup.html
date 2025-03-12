@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenBalance | Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6', // deeper blue
+                        'primary-light': '#f0f7ff', // pale blue
+                        'text-dark': '#1e3a8a', // navy blue
+                        'text-body': '#333333', // dark gray
+                        'accent-green': '#65a30d', // lime green
+                        'accent-orange': '#f97316', // orange
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        /* Custom CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom progress animation */
+        @keyframes fillProgress {
+            from { width: 0; }
+            to { width: var(--fill-width); }
+        }
+        .progress-bar {
+            animation: fillProgress 1.5s ease-out forwards;
+        }
+
+        /* Dark mode styles */
+        .dark body {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+        .dark .bg-primary-light {
+            background-color: #1e293b;
+        }
+        .dark .text-text-body {
+            color: #d1d5db;
+        }
+        .dark .text-text-dark {
+            color: #e5e7eb;
+        }
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+        .dark .shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Password strength meter styles */
+        .password-strength-meter {
+            height: 5px;
+            border-radius: 2px;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+        }
+        .strength-weak { background-color: #ef4444; width: 25%; }
+        .strength-medium { background-color: #f59e0b; width: 50%; }
+        .strength-good { background-color: #65a30d; width: 75%; }
+        .strength-strong { background-color: #10b981; width: 100%; }
+    </style>
+</head>
+<body class="font-sans bg-primary-light dark:bg-gray-900 text-text-body min-h-screen">
+    <!-- Sign-up Page View -->
+    <div id="signup-view" class="min-h-screen flex flex-col justify-center py-8 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="text-center">
+                <div class="text-primary dark:text-blue-400 text-4xl font-bold inline-flex items-center">
+                    <i class="fas fa-balance-scale-right mr-2"></i>
+                    ScreenBalance
+                </div>
+                <h2 class="mt-6 text-3xl font-extrabold text-text-dark dark:text-white">
+                    Create your account
+                </h2>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Already have an account? <a href="#" id="login-link" class="font-medium text-primary hover:text-blue-600 dark:hover:text-blue-400">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+
+            <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <!-- Progress Indicator -->
+                    <div class="mb-8 hidden" id="progress-container">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-medium text-primary dark:text-blue-400" id="progress-text">Step 1 of 2: Personal Information</span>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400" id="progress-percentage">50%</span>
+                        </div>
+                        <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                            <div class="h-2 bg-primary rounded-full" id="progress-bar" style="width: 50%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Error Message Container -->
+                    <div id="signup-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
+                        <div class="flex">
+                            <i class="fas fa-exclamation-circle mr-2 mt-1"></i>
+                            <div>
+                                <p class="font-bold">Error</p>
+                                <p id="error-message">Please fix the errors below.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sign-up Form: Step 1 (Personal Information) -->
+                    <form id="signup-form-step1" class="space-y-6">
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="first-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    First Name
+                                </label>
+                                <div class="mt-1">
+                                    <input id="first-name" name="first-name" type="text" autocomplete="given-name" required 
+                                        class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                                </div>
+                                <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="first-name-error">Please enter your first name</p>
+                            </div>
+
+                            <div>
+                                <label for="last-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Last Name
+                                </label>
+                                <div class="mt-1">
+                                    <input id="last-name" name="last-name" type="text" autocomplete="family-name" required 
+                                        class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                                </div>
+                                <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="last-name-error">Please enter your last name</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Email address
+                            </label>
+                            <div class="mt-1">
+                                <input id="email" name="email" type="email" autocomplete="email" required 
+                                    class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                            </div>
+                            <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="email-error">Please enter a valid email address</p>
+                        </div>
+
+                        <div>
+                            <label for="birth-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Birth Date (Age 14-18)
+                            </label>
+                            <div class="mt-1">
+                                <input id="birth-date" name="birth-date" type="date" required 
+                                    class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                            </div>
+                            <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="birth-date-error">Please select a valid birth date (age 14-18)</p>
+                        </div>
+
+                        <div>
+                            <button type="submit" id="next-step-button" 
+                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <span>Continue</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Sign-up Form: Step 2 (Account Information) -->
+                    <form id="signup-form-step2" class="space-y-6 hidden">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Username
+                            </label>
+                            <div class="mt-1">
+                                <input id="username" name="username" type="text" autocomplete="username" required 
+                                    class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                            </div>
+                            <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="username-error">Username is required (letters, numbers, and underscores only)</p>
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Password
+                            </label>
+                            <div class="mt-1 relative">
+                                <input id="password" name="password" type="password" autocomplete="new-password" required 
+                                    class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                                <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength-meter mt-2" id="password-strength"></div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="password-feedback">Password should be at least 8 characters with letters, numbers and special characters</p>
+                        </div>
+
+                        <div>
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Confirm Password
+                            </label>
+                            <div class="mt-1">
+                                <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required 
+                                    class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                            </div>
+                            <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="confirm-password-error">Passwords don't match</p>
+                        </div>
+
+                        <div>
+                            <label for="screen-time-goal" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Daily Screen Time Goal (hours)
+                            </label>
+                            <div class="mt-1">
+                                <select id="screen-time-goal" name="screen-time-goal" required 
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                                    <option value="">Select a goal</option>
+                                    <option value="2">2 hours</option>
+                                    <option value="3">3 hours</option>
+                                    <option value="4">4 hours</option>
+                                    <option value="5">5 hours</option>
+                                    <option value="6">6 hours</option>
+                                </select>
+                            </div>
+                            <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="screen-time-goal-error">Please select a screen time goal</p>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input id="terms-agree" name="terms-agree" type="checkbox" required
+                                class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700">
+                            <label for="terms-agree" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                I agree to the <a href="#" class="text-primary hover:text-blue-600 dark:hover:text-blue-400">Terms of Service</a> and <a href="#" class="text-primary hover:text-blue-600 dark:hover:text-blue-400">Privacy Policy</a>
+                            </label>
+                        </div>
+                        <p class="mt-1 hidden text-sm text-red-600 dark:text-red-500" id="terms-agree-error">You must agree to the terms</p>
+
+                        <div class="flex items-center space-x-4">
+                            <button type="button" id="back-button" 
+                                class="flex-1 flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Back</span>
+                            </button>
+                            <button type="submit" id="create-account-button" 
+                                class="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green">
+                                <span>Create Account</span>
+                                <div id="loading-spinner" class="hidden ml-2">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Message (Initially Hidden) -->
+                    <div id="signup-success" class="hidden text-center py-8 animate-fade-in">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
+                            <i class="fas fa-check text-2xl text-green-600 dark:text-green-300"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-text-dark dark:text-white mb-2">Account Created Successfully!</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">You're now being redirected to your dashboard...</p>
+                        <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                            <div class="h-2 bg-accent-green rounded-full progress-bar" style="--fill-width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page View (Initially Hidden) -->
+    <div id="home-view" class="hidden min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <!-- Logo -->
+                        <div class="flex-shrink-0 flex items-center">
+                            <div class="text-primary dark:text-blue-400 text-2xl font-bold">
+                                <i class="fas fa-balance-scale-right mr-2"></i>
+                                ScreenBalance
+                            </div>
+                        </div>
+                        <!-- Desktop Navigation Links -->
+                        <div class="hidden md:ml-6 md:flex md:space-x-8">
+                            <a href="#" class="border-b-2 border-primary text-text-dark dark:text-white font-medium text-base px-1 pt-1 border-b-2">Dashboard</a>
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Tools</a>
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Resources</a>
+                            <a href="#" id="history-link" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">History</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <!-- User Menu -->
+                        <div class="ml-3 relative">
+                            <div>
+                                <button id="user-menu-button" class="bg-white dark:bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <span class="sr-only">Open user menu</span>
+                                    <div class="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                        <span id="user-initials">JS</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-user mr-2"></i> Your Profile
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-cog mr-2"></i> Settings
+                                </a>
+                                <a href="#" id="signout-button" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Sign out
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile menu button -->
+                        <div class="flex md:hidden ml-4">
+                            <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-text-dark dark:text-gray-400 hover:text-primary hover:bg-primary-light dark:hover:bg-gray-700 focus:outline-none">
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#" class="bg-primary-light dark:bg-gray-900 text-primary dark:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Tools</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Resources</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">History</a>
+                </div>
+                <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center px-5">
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                                <span id="mobile-user-initials">JS</span>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div id="mobile-user-name" class="text-base font-medium leading-none text-text-dark dark:text-white">John Smith</div>
+                            <div id="mobile-user-email" class="text-sm font-medium leading-none text-gray-500 dark:text-gray-400 mt-1">john.smith@example.com</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 px-2 space-y-1">
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Your Profile</a>
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Settings</a>
+                        <a href="#" id="mobile-signout-button" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <!-- Welcome Section -->
+            <div class="bg-primary dark:bg-gray-800 py-6">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h1 id="welcome-message" class="text-2xl font-bold text-white">Welcome, <span id="user-welcome-name">John</span>!</h1>
+                    <p class="mt-1 text-sm text-blue-100 dark:text-gray-300">Let's start tracking your screen time</p>
+                </div>
+            </div>
+
+            <!-- Getting Started Dashboard -->
+            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Getting Started Cards -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
+                        <h2 class="text-lg font-semibold text-text-dark dark:text-white mb-4">Getting Started</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Step 1 Card -->
+                            <div class="bg-primary-light dark:bg-gray-700 p-4 rounded-lg">
+                                <div class="w-8 h-8 bg-primary dark:bg-blue-800 text-white rounded-full flex items-center justify-center mb-3">
+                                    <span class="font-bold">1</span>
+                                </div>
+                                <h3 class="text-md font-medium text-text-dark dark:text-white mb-2">Set Up Your Profile</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                    Complete your profile to personalize your experience.
+                                </p>
+                                <a href="#" class="inline-flex items-center text-sm font-medium text-primary dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
+                                    Complete profile
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
+
+                            <!-- Step 2 Card -->
+                            <div class="bg-primary-light dark:bg-gray-700 p-4 rounded-lg">
+                                <div class="w-8 h-8 bg-primary dark:bg-blue-800 text-white rounded-full flex items-center justify-center mb-3">
+                                    <span class="font-bold">2</span>
+                                </div>
+                                <h3 class="text-md font-medium text-text-dark dark:text-white mb-2">Connect Your Devices</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                    Track screen time across all your devices.
+                                </p>
+                                <a href="#" class="inline-flex items-center text-sm font-medium text-primary dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
+                                    Add devices
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
+
+                            <!-- Step 3 Card -->
+                            <div class="bg-primary-light dark:bg-gray-700 p-4 rounded-lg">
+                                <div class="w-8 h-8 bg-primary dark:bg-blue-800 text-white rounded-full flex items-center justify-center mb-3">
+                                    <span class="font-bold">3</span>
+                                </div>
+                                <h3 class="text-md font-medium text-text-dark dark:text-white mb-2">Set App Limits</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                    Create custom limits for your most-used apps.
+                                </p>
+                                <a href="#" class="inline-flex items-center text-sm font-medium text-primary dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
+                                    Set limits
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Your Goal Section -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-white dark:bg-gray-800">
+                            <h2 class="text-lg font-semibold text-text-dark dark:text-white mb-4">Your Daily Screen Time Goal</h2>
+                            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+                                <div class="w-36 h-36 relative">
+                                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                                        <circle 
+                                            cx="50" 
+                                            cy="50" 
+                                            r="45" 
+                                            fill="none" 
+                                            stroke="#e5e7eb" 
+                                            stroke-width="10"
+                                            class="dark:stroke-gray-700"
+                                        />
+                                        <circle 
+                                            cx="50" 
+                                            cy="50" 
+                                            r="45" 
+                                            fill="none" 
+                                            stroke="#65a30d" 
+                                            stroke-width="10"
+                                            stroke-dasharray="283" 
+                                            stroke-dashoffset="283" 
+                                            class="progress-bar" 
+                                            style="--fill-width: 0%;stroke-dashoffset:283" 
+                                            id="goal-circle"
+                                        />
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                        <span id="goal-progress" class="text-3xl font-bold text-text-dark dark:text-white">0%</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">of goal</span>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span id="goal-hours" class="text-lg font-medium text-text-dark dark:text-white">5 hours</span>
+                                        <span id="current-hours" class="text-md text-gray-600 dark:text-gray-400">0h 0m used</span>
+                                    </div>
+                                    <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-accent-green" id="goal-bar" style="width: 0%"></div>
+                                    </div>
+                                    <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                                        Start tracking your screen time to see progress toward your daily goal.
+                                    </p>
+                                    <button class="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                        Start Tracking
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Tips Section -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-white dark:bg-gray-800">
+                            <h2 class="text-lg font-semibold text-text-dark dark:text-white mb-4">Quick Tips to Reduce Screen Time</h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="border border-gray-200 dark:border-gray-700 rounded p-3">
+                                    <div class="flex items-center mb-2">
+                                        <div class="text-accent-orange dark:text-orange-400 mr-3">
+                                            <i class="fas fa-bell-slash text-xl"></i>
+                                        </div>
+                                        <h3 class="text-md font-medium text-text-dark dark:text-white">Turn Off Notifications</h3>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                                        Disable non-essential notifications to reduce distractions.
+                                    </p>
+                                </div>
+                                <div class="border border-gray-200 dark:border-gray-700 rounded p-3">
+                                    <div class="flex items-center mb-2">
+                                        <div class="text-accent-green dark:text-green-400 mr-3">
+                                            <i class="fas fa-hourglass-half text-xl"></i>
+                                        </div>
+                                        <h3 class="text-md font-medium text-text-dark dark:text-white">Set Time Blocks</h3>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                                        Allocate specific times for checking social media and messages.
+                                    </p>
+                                </div>
+                                <div class="border border-gray-200 dark:border-gray-700 rounded p-3">
+                                    <div class="flex items-center mb-2">
+                                        <div class="text-primary dark:text-blue-400 mr-3">
+                                            <i class="fas fa-moon text-xl"></i>
+                                        </div>
+                                        <h3 class="text-md font-medium text-text-dark dark:text-white">Screen-Free Bedtime</h3>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                                        Put devices away 1 hour before bed for better sleep quality.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==============================================
+        // SIGN-UP FORM VALIDATION AND INTERACTION
+        // ==============================================
+        
+        // Form elements
+        const signupFormStep1 = document.getElementById('signup-form-step1');
+        const signupFormStep2 = document.getElementById('signup-form-step2');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const loginLink = document.getElementById('login-link');
+        
+        // Form fields - Step 1
+        const firstNameInput = document.getElementById('first-name');
+        const lastNameInput = document.getElementById('last-name');
+        const emailInput = document.getElementById('email');
+        const birthDateInput = document.getElementById('birth-date');
+        
+        // Form fields - Step 2
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const screenTimeGoalSelect = document.getElementById('screen-time-goal');
+        const termsAgreeCheckbox = document.getElementById('terms-agree');
+        
+        // Buttons
+        const nextStepButton = document.getElementById('next-step-button');
+        const backButton = document.getElementById('back-button');
+        const createAccountButton = document.getElementById('create-account-button');
+        
+        // Error messages
+        const errorContainer = document.getElementById('signup-error');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Success message
+        const successMessage = document.getElementById('signup-success');
+        
+        // Password strength elements
+        const passwordStrength = document.getElementById('password-strength');
+        const passwordFeedback = document.getElementById('password-feedback');
+        
+        // Password toggle
+        document.getElementById('toggle-password').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.remove('fa-eye');
+                passwordIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+            }
+        });
+        
+        // Go to login page
+        loginLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            // In a real app, this would redirect to login.php
+            alert('This would redirect to the login page in a real application.');
+        });
+        
+        // Step 1 form submission
+        signupFormStep1.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            let isValid = true;
+            
+            // Validate first name
+            if (!firstNameInput.value.trim()) {
+                document.getElementById('first-name-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('first-name-error').classList.add('hidden');
+            }
+            
+            // Validate last name
+            if (!lastNameInput.value.trim()) {
+                document.getElementById('last-name-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('last-name-error').classList.add('hidden');
+            }
+            
+            // Validate email
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailInput.value.trim() || !emailPattern.test(emailInput.value.trim())) {
+                document.getElementById('email-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('email-error').classList.add('hidden');
+            }
+            
+            // Validate birth date (age 14-18)
+            if (birthDateInput.value) {
+                const today = new Date();
+                const birthDate = new Date(birthDateInput.value);
+                const age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                
+                if (age < 14 || age > 18) {
+                    document.getElementById('birth-date-error').classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('birth-date-error').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('birth-date-error').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            // If valid, proceed to step 2
+            if (isValid) {
+                goToStep2();
+            } else {
+                errorContainer.classList.remove('hidden');
+                errorMessage.textContent = 'Please fix the errors highlighted below.';
+            }
+        });
+        
+        // Back button click
+        backButton.addEventListener('click', function() {
+            goToStep1();
+        });
+        
+        // Step 2 form submission
+        signupFormStep2.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            let isValid = true;
+            
+            // Validate username
+            const usernamePattern = /^[a-zA-Z0-9_]+$/;
+            if (!usernameInput.value.trim() || !usernamePattern.test(usernameInput.value.trim())) {
+                document.getElementById('username-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('username-error').classList.add('hidden');
+            }
+            
+            // Validate password
+            if (passwordInput.value.length < 8) {
+                isValid = false;
+            }
+            
+            // Validate confirm password
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                document.getElementById('confirm-password-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('confirm-password-error').classList.add('hidden');
+            }
+            
+            // Validate screen time goal
+            if (!screenTimeGoalSelect.value) {
+                document.getElementById('screen-time-goal-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('screen-time-goal-error').classList.add('hidden');
+            }
+            
+            // Validate terms agreement
+            if (!termsAgreeCheckbox.checked) {
+                document.getElementById('terms-agree-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('terms-agree-error').classList.add('hidden');
+            }
+            
+            // If valid, create account
+            if (isValid) {
+                createAccount();
+            } else {
+                errorContainer.classList.remove('hidden');
+                errorMessage.textContent = 'Please fix the errors highlighted below.';
+            }
+        });
+        
+        // Password strength meter
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            let feedbackText = '';
+            
+            // Calculate strength
+            if (password.length >= 8) strength += 25;
+            if (password.match(/[a-z]+/)) strength += 25;
+            if (password.match(/[A-Z]+/)) strength += 25;
+            if (password.match(/[0-9]+/) || password.match(/[^a-zA-Z0-9]+/)) strength += 25;
+            
+            // Update UI
+            passwordStrength.className = 'password-strength-meter';
+            
+            if (strength === 0) {
+                passwordStrength.classList.add('hidden');
+                feedbackText = 'Password should be at least 8 characters with letters, numbers and special characters';
+            } else if (strength <= 25) {
+                passwordStrength.classList.remove('hidden');
+                passwordStrength.classList.add('strength-weak');
+                feedbackText = 'Weak password - try adding uppercase letters, numbers, or symbols';
+            } else if (strength <= 50) {
+                passwordStrength.classList.remove('hidden');
+                passwordStrength.classList.add('strength-medium');
+                feedbackText = 'Medium strength - add more variety for a stronger password';
+            } else if (strength <= 75) {
+                passwordStrength.classList.remove('hidden');
+                passwordStrength.classList.add('strength-good');
+                feedbackText = 'Good password - consider adding more complexity';
+            } else {
+                passwordStrength.classList.remove('hidden');
+                passwordStrength.classList.add('strength-strong');
+                feedbackText = 'Strong password - excellent job!';
+            }
+            
+            passwordFeedback.textContent = feedbackText;
+        });
+        
+        // Go to step 2
+        function goToStep2() {
+            signupFormStep1.classList.add('hidden');
+            signupFormStep2.classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '50%';
+            progressText.textContent = 'Step 2 of 2: Account Information';
+            progressPercentage.textContent = '50%';
+            errorContainer.classList.add('hidden');
+        }
+        
+        // Go back to step 1
+        function goToStep1() {
+            signupFormStep2.classList.add('hidden');
+            signupFormStep1.classList.remove('hidden');
+            progressBar.style.width = '50%';
+            progressText.textContent = 'Step 1 of 2: Personal Information';
+            progressPercentage.textContent = '50%';
+            errorContainer.classList.add('hidden');
+        }
+        
+        // Create account function
+        function createAccount() {
+            // Show loading state
+            const loadingSpinner = document.getElementById('loading-spinner');
+            createAccountButton.querySelector('span').textContent = 'Creating...';
+            loadingSpinner.classList.remove('hidden');
+            
+            // Simulate network delay
+            setTimeout(() => {
+                // Hide forms, show success message
+                signupFormStep2.classList.add('hidden');
+                progressContainer.classList.add('hidden');
+                successMessage.classList.remove('hidden');
+                
+                // Simulate redirect after success
+                setTimeout(() => {
+                    showHomePage();
+                }, 2000);
+            }, 1500);
+        }
+        
+        // ==============================================
+        // HOME PAGE FUNCTIONALITY
+        // ==============================================
+        
+        // Current user data
+        let currentUser = {
+            firstName: '',
+            lastName: '',
+            email: '',
+            username: '',
+            screenTimeGoal: 0,
+            screenTimeToday: 0
+        };
+        
+        // Show the home page with user data
+        function showHomePage() {
+            // Update current user with form data
+            currentUser.firstName = firstNameInput.value;
+            currentUser.lastName = lastNameInput.value;
+            currentUser.email = emailInput.value;
+            currentUser.username = usernameInput.value;
+            currentUser.screenTimeGoal = parseInt(screenTimeGoalSelect.value);
+            currentUser.screenTimeToday = 0; // New user starts with 0
+            
+            // Hide signup view, show home view
+            document.getElementById('signup-view').classList.add('hidden');
+            document.getElementById('home-view').classList.remove('hidden');
+            
+            // Update user interface with current user data
+            updateUserInterface();
+        }
+        
+        // Update the user interface with current user's data
+        function updateUserInterface() {
+            if (!currentUser) return;
+            
+            // Update welcome message
+            document.getElementById('user-welcome-name').textContent = currentUser.firstName;
+            
+            // Update user information
+            document.getElementById('user-initials').textContent = `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`;
+            document.getElementById('mobile-user-initials').textContent = `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`;
+            document.getElementById('mobile-user-name').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            document.getElementById('mobile-user-email').textContent = currentUser.email;
+            
+            // Update screen time goal
+            document.getElementById('goal-hours').textContent = `${currentUser.screenTimeGoal} hours`;
+            document.getElementById('current-hours').textContent = '0h 0m used';
+            
+            // Update goal circle
+            const percentage = (currentUser.screenTimeToday / currentUser.screenTimeGoal) * 100;
+            const goalCircle = document.getElementById('goal-circle');
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (percentage / 100) * circumference;
+            goalCircle.style.setProperty('--fill-width', `${percentage}%`);
+            goalCircle.style.strokeDashoffset = offset;
+            
+            // Update goal progress
+            document.getElementById('goal-progress').textContent = '0%';
+            document.getElementById('goal-bar').style.width = '0%';
+        }
+        
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('user-menu-button')?.addEventListener('click', function() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Sign out buttons
+        document.getElementById('signout-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            signOutUser();
+        });
+
+        document.getElementById('mobile-signout-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            signOutUser();
+        });
+        
+        // Sign out the current user
+        function signOutUser() {
+            // In a real app, this would involve clearing session data
+            // For this demo, just redirect to the signup page
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('signup-view').classList.remove('hidden');
+            
+            // Reset signup forms
+            signupFormStep1.reset();
+            signupFormStep2.reset();
+            signupFormStep2.classList.add('hidden');
+            signupFormStep1.classList.remove('hidden');
+            successMessage.classList.add('hidden');
+            progressContainer.classList.add('hidden');
+            
+            // Reset loading state
+            document.getElementById('loading-spinner').classList.add('hidden');
+            createAccountButton.querySelector('span').textContent = 'Create Account';
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const button = document.getElementById('user-menu-button');
+            
+            if (dropdown && !dropdown.classList.contains('hidden') && !button?.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <!-- 
+    *** SERVER-SIDE CODE (PHP/SQL) ***
+    This section shows how the registration would be implemented on a real server.
+    This code won't run in the Poe Canvas but demonstrates the structure.
+    
+    *** register.php ***
+    <?php
+    session_start();
+    require_once 'database.php';
+
+    // Check if user is already logged in
+    if (isset($_SESSION['user_id'])) {
+        header('Location: home.php');
+        exit;
+    }
+
+    $errors = [];
+    $form_data = [
+        'first_name' => '',
+        'last_name' => '',
+        'email' => '',
+        'birth_date' => '',
+        'username' => '',
+        'screen_time_goal' => ''
+    ];
+
+    // Process form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Get form data
+        $form_data = [
+            'first_name' => $_POST['first_name'] ?? '',
+            'last_name' => $_POST['last_name'] ?? '',
+            'email' => $_POST['email'] ?? '',
+            'birth_date' => $_POST['birth_date'] ?? '',
+            'username' => $_POST['username'] ?? '',
+            'password' => $_POST['password'] ?? '',
+            'confirm_password' => $_POST['confirm_password'] ?? '',
+            'screen_time_goal' => $_POST['screen_time_goal'] ?? '',
+            'terms_agree' => isset($_POST['terms_agree'])
+        ];
+        
+        // Validate first name
+        if (empty($form_data['first_name'])) {
+            $errors['first_name'] = 'First name is required';
+        }
+        
+        // Validate last name
+        if (empty($form_data['last_name'])) {
+            $errors['last_name'] = 'Last name is required';
+        }
+        
+        // Validate email
+        if (empty($form_data['email']) || !filter_var($form_data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Valid email is required';
+        } else {
+            // Check if email already exists
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->execute([$form_data['email']]);
+            if ($stmt->fetchColumn()) {
+                $errors['email'] = 'Email already in use';
+            }
+        }
+        
+        // Validate birth date (age 14-18)
+        if (empty($form_data['birth_date'])) {
+            $errors['birth_date'] = 'Birth date is required';
+        } else {
+            $today = new DateTime();
+            $birth_date = new DateTime($form_data['birth_date']);
+            $age = $today->diff($birth_date)->y;
+            
+            if ($age < 14 || $age > 18) {
+                $errors['birth_date'] = 'You must be between 14 and 18 years old';
+            }
+        }
+        
+        // Validate username
+        if (empty($form_data['username']) || !preg_match('/^[a-zA-Z0-9_]+$/', $form_data['username'])) {
+            $errors['username'] = 'Username is required (letters, numbers, and underscores only)';
+        } else {
+            // Check if username already exists
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+            $stmt->execute([$form_data['username']]);
+            if ($stmt->fetchColumn()) {
+                $errors['username'] = 'Username already taken';
+            }
+        }
+        
+        // Validate password
+        if (empty($form_data['password']) || strlen($form_data['password']) < 8) {
+            $errors['password'] = 'Password must be at least 8 characters';
+        }
+        
+        // Validate password confirmation
+        if ($form_data['password'] !== $form_data['confirm_password']) {
+            $errors['confirm_password'] = 'Passwords do not match';
+        }
+        
+        // Validate screen time goal
+        if (empty($form_data['screen_time_goal']) || !in_array($form_data['screen_time_goal'], ['2', '3', '4', '5', '6'])) {
+            $errors['screen_time_goal'] = 'Please select a valid screen time goal';
+        }
+        
+        // Validate terms agreement
+        if (!$form_data['terms_agree']) {
+            $errors['terms_agree'] = 'You must agree to the terms and conditions';
+        }
+        
+        // If no errors, create user account
+        if (empty($errors)) {
+            try {
+                // Begin transaction
+                $pdo->beginTransaction();
+                
+                // Hash password
+                $password_hash = password_hash($form_data['password'], PASSWORD_DEFAULT);
+                
+                // Insert user into database
+                $sql = "INSERT INTO users (username, email, password_hash, first_name, last_name, birth_date, screen_time_limit) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    $form_data['username'],
+                    $form_data['email'],
+                    $password_hash,
+                    $form_data['first_name'],
+                    $form_data['last_name'],
+                    $form_data['birth_date'],
+                    $form_data['screen_time_goal']
+                ]);
+                
+                // Get new user ID
+                $user_id = $pdo->lastInsertId();
+                
+                // Create default settings for user
+                $sql = "INSERT INTO user_settings (user_id, notification_enabled, dark_mode_enabled) 
+                        VALUES (?, 1, 0)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$user_id]);
+                
+                // Commit transaction
+                $pdo->commit();
+                
+                // Set session variables
+                $_SESSION['user_id'] = $user_id;
+                $_SESSION['username'] = $form_data['username'];
+                $_SESSION['first_name'] = $form_data['first_name'];
+                $_SESSION['last_name'] = $form_data['last_name'];
+                
+                // Redirect to home page
+                header('Location: home.php?new_user=1');
+                exit;
+                
+            } catch (PDOException $e) {
+                // Rollback transaction on error
+                $pdo->rollBack();
+                $errors['system'] = 'An error occurred. Please try again later.';
+            }
+        }
+    }
+    ?>
+
+    *** SQL Schema Additions for Registration ***
+    /* These tables would be added to the previous login system schema */
+
+    /* User settings table to store preferences */
+    CREATE TABLE user_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        notification_enabled BOOLEAN NOT NULL DEFAULT 1,
+        dark_mode_enabled BOOLEAN NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    /* Table for tracking app connections */
+    CREATE TABLE connected_devices (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        device_name VARCHAR(100) NOT NULL,
+        device_type ENUM('phone', 'tablet', 'computer', 'other') NOT NULL,
+        device_identifier VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    /* Table for app-specific limits */
+    CREATE TABLE app_limits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        app_name VARCHAR(100) NOT NULL,
+        daily_limit INT NOT NULL, /* in minutes */
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE KEY user_app (user_id, app_name)
+    );
+    -->
+</body>
+</html>

@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenBalance | Screen Time History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6', // deeper blue
+                        'primary-light': '#f0f7ff', // pale blue
+                        'text-dark': '#1e3a8a', // navy blue
+                        'text-body': '#333333', // dark gray
+                        'accent-green': '#65a30d', // lime green
+                        'accent-orange': '#f97316', // orange
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        /* Custom CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calendar-day {
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-day:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .app-usage-bar {
+            transition: width 1s ease-out;
+        }
+        
+        .timeline-item {
+            position: relative;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 24px;
+            height: calc(100% - 24px);
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+        
+        .timeline-item:last-child::before {
+            display: none;
+        }
+        
+        .dark .timeline-item::before {
+            background-color: #4b5563;
+        }
+        
+        .tab-button {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        
+        .tab-button.active::after {
+            width: 100%;
+        }
+        
+        /* Custom progress animation */
+        @keyframes fillProgress {
+            from { width: 0; }
+            to { width: var(--fill-width); }
+        }
+        .progress-bar {
+            animation: fillProgress 1.5s ease-out forwards;
+        }
+
+        /* Heatmap colors */
+        .heatmap-0 { background-color: #f0f9ff; }
+        .heatmap-1 { background-color: #bfdbfe; }
+        .heatmap-2 { background-color: #93c5fd; }
+        .heatmap-3 { background-color: #60a5fa; }
+        .heatmap-4 { background-color: #3b82f6; }
+        .heatmap-5 { background-color: #2563eb; }
+        
+        .dark .heatmap-0 { background-color: #1e293b; }
+        .dark .heatmap-1 { background-color: #1e40af; }
+        .dark .heatmap-2 { background-color: #2563eb; }
+        .dark .heatmap-3 { background-color: #3b82f6; }
+        .dark .heatmap-4 { background-color: #60a5fa; }
+        .dark .heatmap-5 { background-color: #93c5fd; }
+
+        /* Dark mode styles */
+        .dark body {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+        .dark .bg-primary-light {
+            background-color: #1e293b;
+        }
+        .dark .text-text-body {
+            color: #d1d5db;
+        }
+        .dark .text-text-dark {
+            color: #e5e7eb;
+        }
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+        .dark .shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="font-sans bg-primary-light dark:bg-gray-900 text-text-body min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <!-- Logo -->
+                        <div class="flex-shrink-0 flex items-center">
+                            <div class="text-primary dark:text-blue-400 text-2xl font-bold">
+                                <i class="fas fa-balance-scale-right mr-2"></i>
+                                ScreenBalance
+                            </div>
+                        </div>
+                        <!-- Desktop Navigation Links -->
+                        <div class="hidden md:ml-6 md:flex md:space-x-8">
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Dashboard</a>
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Tools</a>
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Resources</a>
+                            <a href="#" id="history-link" class="border-b-2 border-primary text-text-dark dark:text-white font-medium text-base px-1 pt-1 border-b-2">History</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <!-- User Menu -->
+                        <div class="ml-3 relative">
+                            <div>
+                                <button id="user-menu-button" class="bg-white dark:bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <span class="sr-only">Open user menu</span>
+                                    <div class="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                        <span id="user-initials">JS</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-user mr-2"></i> Your Profile
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-cog mr-2"></i> Settings
+                                </a>
+                                <a href="#" id="signout-button" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Sign out
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile menu button -->
+                        <div class="flex md:hidden ml-4">
+                            <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-text-dark dark:text-gray-400 hover:text-primary hover:bg-primary-light dark:hover:bg-gray-700 focus:outline-none">
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Tools</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Resources</a>
+                    <a href="#" class="bg-primary-light dark:bg-gray-900 text-primary dark:text-white block px-3 py-2 rounded-md text-base font-medium">History</a>
+                </div>
+                <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center px-5">
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                                <span id="mobile-user-initials">JS</span>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div id="mobile-user-name" class="text-base font-medium leading-none text-text-dark dark:text-white">John Smith</div>
+                            <div id="mobile-user-email" class="text-sm font-medium leading-none text-gray-500 dark:text-gray-400 mt-1">john.smith@example.com</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 px-2 space-y-1">
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Your Profile</a>
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Settings</a>
+                        <a href="#" id="mobile-signout-button" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <!-- Page Header -->
+            <div class="bg-primary dark:bg-gray-800 py-6">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h1 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-history mr-3"></i>
+                        Your Screen Time History
+                    </h1>
+                    <p class="mt-1 text-sm text-blue-100 dark:text-gray-300">
+                        Track your digital habits and see your progress over time
+                    </p>
+                </div>
+            </div>
+
+            <!-- Time Period Selector -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                        <div class="flex space-x-4">
+                            <button class="tab-button active px-4 py-2 text-primary font-medium text-base" data-tab="overview">
+                                Overview
+                            </button>
+                            <button class="tab-button px-4 py-2 text-gray-500 dark:text-gray-400 font-medium text-base" data-tab="daily">
+                                Daily Breakdown
+                            </button>
+                            <button class="tab-button px-4 py-2 text-gray-500 dark:text-gray-400 font-medium text-base" data-tab="trends">
+                                Trends & Analysis
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <select id="time-period" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary focus:border-primary rounded-md dark:bg-gray-700 dark:text-white">
+                                    <option value="week">This Week</option>
+                                    <option value="month" selected>This Month</option>
+                                    <option value="3month">Last 3 Months</option>
+                                    <option value="6month">Last 6 Months</option>
+                                    <option value="year">This Year</option>
+                                </select>
+                            </div>
+                            <button class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <i class="fas fa-file-export mr-2"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tab-content">
+                    <!-- Overview Tab -->
+                    <div id="overview-tab" class="tab-panel">
+                        <!-- Summary Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <!-- Average Screen Time Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Average Daily Use</h3>
+                                    <div class="text-primary dark:text-blue-400 text-xl">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-3xl font-bold text-text-dark dark:text-white">3h 42m</p>
+                                <div class="mt-2 flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                        <i class="fas fa-arrow-down mr-1"></i> 8% from last month
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="relative pt-1">
+                                        <div class="overflow-hidden h-2 mb-1 text-xs flex rounded bg-blue-200 dark:bg-gray-600">
+                                            <div style="width: 74%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-gray-500 dark:text-gray-400">Goal: 5 hours</span>
+                                            <span class="text-primary dark:text-blue-400">74% of limit</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Goal Completion Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Goal Achievement</h3>
+                                    <div class="text-accent-green dark:text-green-400 text-xl">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-3xl font-bold text-text-dark dark:text-white">21 Days</p>
+                                <div class="mt-2 flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                        <i class="fas fa-arrow-up mr-1"></i> 3 more than last month
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="relative pt-1">
+                                        <div class="overflow-hidden h-2 mb-1 text-xs flex rounded bg-blue-200 dark:bg-gray-600">
+                                            <div style="width: 68%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-accent-green"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-gray-500 dark:text-gray-400">Month: 31 days</span>
+                                            <span class="text-accent-green dark:text-green-400">68% success rate</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Most Used Apps Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Top Apps</h3>
+                                    <div class="text-accent-orange dark:text-orange-400 text-xl">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="space-y-3">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Instagram</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">37.2%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                                <div class="bg-pink-500 h-2 rounded-full" style="width: 37.2%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">YouTube</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">24.8%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                                <div class="bg-red-500 h-2 rounded-full" style="width: 24.8%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">TikTok</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">18.5%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                                <div class="bg-cyan-500 h-2 rounded-full" style="width: 18.5%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Month Calendar View -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+                            <div class="p-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">October 2023</h3>
+                                    <div class="flex">
+                                        <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <i class="fas fa-chevron-left text-gray-600 dark:text-gray-400"></i>
+                                        </button>
+                                        <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <i class="fas fa-chevron-right text-gray-600 dark:text-gray-400"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Sun</div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Mon</div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Tue</div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Wed</div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Thu</div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Fri</div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Sat</div>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1">
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">1</span>
+                                            <div class="heatmap-1 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">2.1h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">2</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.5h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">3</span>
+                                            <div class="heatmap-4 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">5.2h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">4</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.8h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">5</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.7h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">6</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">7</span>
+                                            <div class="heatmap-5 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">6.4h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                                            <span class="text-sm font-medium text-primary dark:text-blue-400">8</span>
+                                            <div class="heatmap-1 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">2.5h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">9</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.6h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">10</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.2h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">11</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.5h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">12</span>
+                                            <div class="heatmap-0 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">1.8h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">13</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">14</span>
+                                            <div class="heatmap-4 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">5.9h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">15</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.1h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">16</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.4h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">17</span>
+                                            <div class="heatmap-1 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">2.9h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">18</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.8h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">19</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">20</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.7h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">21</span>
+                                            <div class="heatmap-4 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">5.6h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">22</span>
+                                            <div class="heatmap-1 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">2.4h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">23</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.5h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">24</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.7h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">25</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.2h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">26</span>
+                                            <div class="heatmap-0 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">1.7h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">27</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.2h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">28</span>
+                                            <div class="heatmap-3 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">4.5h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">29</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">30</span>
+                                            <div class="heatmap-1 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">2.8h</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-day rounded-md p-1 cursor-pointer">
+                                        <div class="h-16 flex flex-col items-center justify-between p-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">31</span>
+                                            <div class="heatmap-2 w-8 h-2 rounded-full mt-1"></div>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">3.4h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-center mt-4">
+                                    <div class="flex items-center space-x-8">
+                                        <div class="flex items-center">
+                                            <div class="heatmap-0 w-3 h-3 rounded-full"></div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">0-2h</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="heatmap-1 w-3 h-3 rounded-full"></div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">2-3h</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="heatmap-2 w-3 h-3 rounded-full"></div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">3-4h</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="heatmap-3 w-3 h-3 rounded-full"></div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">4-5h</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="heatmap-4 w-3 h-3 rounded-full"></div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">5-6h</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="heatmap-5 w-3 h-3 rounded-full"></div>
+                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">6h+</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Trend Chart -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">Monthly Trend</h3>
+                            <div class="chart-container">
+                                <canvas id="monthlyTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Breakdown Tab (Initially Hidden) -->
+                    <div id="daily-tab" class="tab-panel hidden">
+                        <!-- Date Selector -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                            <div class="flex items-center justify-between">
+                                <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
+                                    <i class="fas fa-chevron-left mr-2"></i>
+                                    Previous Day
+                                </button>
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white">October 8, 2023</h3>
+                                <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
+                                    Next Day
+                                    <i class="fas fa-chevron-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Day Summary -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <!-- Total Screen Time Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Total Screen Time</h3>
+                                    <div class="text-primary dark:text-blue-400 text-xl">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-3xl font-bold text-text-dark dark:text-white">2h 30m</p>
+                                <div class="mt-2 flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                        <i class="fas fa-arrow-down mr-1"></i> 1h 12m from yesterday
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="relative pt-1">
+                                        <div class="overflow-hidden h-2 mb-1 text-xs flex rounded bg-blue-200 dark:bg-gray-600">
+                                            <div style="width: 50%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-gray-500 dark:text-gray-400">Goal: 5 hours</span>
+                                            <span class="text-primary dark:text-blue-400">50% of limit</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pickups Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Pickups</h3>
+                                    <div class="text-accent-orange dark:text-orange-400 text-xl">
+                                        <i class="fas fa-hand-pointer"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-3xl font-bold text-text-dark dark:text-white">38</p>
+                                <div class="mt-2 flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                        <i class="fas fa-arrow-down mr-1"></i> 12 fewer than yesterday
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        First pickup: <span class="font-medium text-text-dark dark:text-white">7:24 AM</span>
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        Last usage: <span class="font-medium text-text-dark dark:text-white">10:45 PM</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notifications Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-text-dark dark:text-white">Notifications</h3>
+                                    <div class="text-primary dark:text-blue-400 text-xl">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-3xl font-bold text-text-dark dark:text-white">87</p>
+                                <div class="mt-2 flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
+                                        <i class="fas fa-arrow-up mr-1"></i> 14 more than yesterday
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Instagram</div>
+                                            <div class="text-sm font-medium text-text-dark dark:text-white">42</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Messages</div>
+                                            <div class="text-sm font-medium text-text-dark dark:text-white">23</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Email</div>
+                                            <div class="text-sm font-medium text-text-dark dark:text-white">15</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Other</div>
+                                            <div class="text-sm font-medium text-text-dark dark:text-white">7</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hourly Usage Chart -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">Hourly Usage</h3>
+                            <div class="chart-container">
+                                <canvas id="hourlyUsageChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- App Usage Breakdown -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">App Usage</h3>
+                            <div class="overflow-hidden">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Application
+                                            </th>
+                                            <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Time Used
+                                            </th>
+                                            <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                % of Total
+                                            </th>
+                                            <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Vs. Yesterday
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center text-pink-500 dark:text-pink-300">
+                                                        <i class="fab fa-instagram"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">Instagram</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900 dark:text-white">45m</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 max-w-[150px]">
+                                                    <div class="bg-pink-500 h-2.5 rounded-full app-usage-bar" style="width: 30%"></div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">30%</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                    <i class="fas fa-arrow-down mr-1"></i> 18%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-500 dark:text-red-300">
+                                                        <i class="fab fa-youtube"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">YouTube</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900 dark:text-white">38m</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 max-w-[150px]">
+                                                    <div class="bg-red-500 h-2.5 rounded-full app-usage-bar" style="width: 25.3%"></div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">25.3%</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                    <i class="fas fa-arrow-down mr-1"></i> 5%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-500 dark:text-blue-300">
+                                                        <i class="fas fa-book"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">Books App</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900 dark:text-white">32m</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 max-w-[150px]">
+                                                    <div class="bg-blue-500 h-2.5 rounded-full app-usage-bar" style="width: 21.3%"></div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">21.3%</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
+                                                    <i class="fas fa-arrow-up mr-1"></i> 45%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-500 dark:text-green-300">
+                                                        <i class="fab fa-whatsapp"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">WhatsApp</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900 dark:text-white">21m</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 max-w-[150px]">
+                                                    <div class="bg-green-500 h-2.5 rounded-full app-usage-bar" style="width: 14%"></div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">14%</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                    <i class="fas fa-minus mr-1"></i> 0%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center text-cyan-500 dark:text-cyan-300">
+                                                        <i class="fab fa-tiktok"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">TikTok</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900 dark:text-white">14m</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 max-w-[150px]">
+                                                    <div class="bg-cyan-500 h-2.5 rounded-full app-usage-bar" style="width: 9.3%"></div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">9.3%</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                    <i class="fas fa-arrow-down mr-1"></i> 65%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trends & Analysis Tab (Initially Hidden) -->
+                    <div id="trends-tab" class="tab-panel hidden">
+                        <!-- Time Period Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Weekly Comparison Chart -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">Weekly Comparison</h3>
+                                <div class="chart-container">
+                                    <canvas id="weeklyComparisonChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Weekly Stats -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">Weekly Stats</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Most Active Day</span>
+                                            <span class="text-sm text-primary dark:text-blue-400 font-medium">Saturday</span>
+                                        </div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Average screen time</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">5.4 hours</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Least Active Day</span>
+                                            <span class="text-sm text-accent-green dark:text-green-400 font-medium">Sunday</span>
+                                        </div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Average screen time</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">2.1 hours</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Most Used App</span>
+                                            <span class="text-sm text-primary dark:text-blue-400 font-medium">Instagram</span>
+                                        </div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Weekly usage</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">8.5 hours (33.1%)</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Most Active Time</span>
+                                            <span class="text-sm text-primary dark:text-blue-400 font-medium">8 PM - 10 PM</span>
+                                        </div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Average daily usage during this time</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">1.3 hours</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- App Usage Trends -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">App Usage Trends</h3>
+                            <div class="chart-container">
+                                <canvas id="appTrendsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Goal Achievement -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-text-dark dark:text-white">Goal Achievement</h3>
+                                <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                    Last 3 Months
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div class="col-span-2">
+                                    <div class="chart-container">
+                                        <canvas id="goalAchievementChart"></canvas>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="space-y-6">
+                                        <div>
+                                            <h4 class="text-base font-medium text-text-dark dark:text-white mb-2">Goal Achievement Rate</h4>
+                                            <div class="text-3xl font-bold text-text-dark dark:text-white">
+                                                68%
+                                                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">of days</span>
+                                            </div>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">21 out of 31 days this month</p>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-base font-medium text-text-dark dark:text-white mb-2">Streak</h4>
+                                            <div class="flex items-center">
+                                                <div class="text-3xl font-bold text-accent-green dark:text-green-400">
+                                                    4
+                                                </div>
+                                                <div class="ml-2">
+                                                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Current streak</div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">Best: 8 days</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-base font-medium text-text-dark dark:text-white mb-2">Monthly Progress</h4>
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">August: 45%</span>
+                                            </div>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">September: 58%</span>
+                                            </div>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">October: 68%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Insights and Recommendations -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                            <h3 class="text-lg font-medium text-text-dark dark:text-white mb-4">Insights & Recommendations</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-base font-medium text-text-dark dark:text-white mb-3">Patterns Detected</h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex">
+                                            <i class="fas fa-chart-line text-primary dark:text-blue-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">Your screen time has decreased by <span class="font-medium">8%</span> compared to last month.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <i class="fas fa-bell text-accent-orange dark:text-orange-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">You pick up your phone most frequently between <span class="font-medium">4 PM and 6 PM</span>.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <i class="fas fa-mobile-alt text-accent-green dark:text-green-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">Your TikTok usage has decreased by <span class="font-medium">22%</span> over the past two weeks.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">Instagram consistently exceeds your daily app limit by an average of <span class="font-medium">18 minutes</span>.</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-text-dark dark:text-white mb-3">Recommendations</h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex">
+                                            <i class="fas fa-lightbulb text-yellow-500 dark:text-yellow-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">Try setting a stricter time limit for Instagram to reduce overall usage.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <i class="fas fa-lightbulb text-yellow-500 dark:text-yellow-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">Consider enabling "Do Not Disturb" mode during your peak notification times (4-6 PM).</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <i class="fas fa-lightbulb text-yellow-500 dark:text-yellow-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">You're making great progress with reducing TikTok usage - keep up the good work!</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <i class="fas fa-lightbulb text-yellow-500 dark:text-yellow-400 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">Your weekend usage spikes could be balanced by planning more offline activities.</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ==============================================
+        // UI INTERACTION HANDLERS
+        // ==============================================
+        
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('user-menu-button')?.addEventListener('click', function() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const button = document.getElementById('user-menu-button');
+            
+            if (dropdown && !dropdown.classList.contains('hidden') && !button?.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+        
+        // Tab switching
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Update active tab button
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-gray-500', 'dark:text-gray-400');
+                    btn.classList.remove('text-primary');
+                });
+                button.classList.add('active');
+                button.classList.remove('text-gray-500', 'dark:text-gray-400');
+                button.classList.add('text-primary');
+                
+                // Show the corresponding tab panel
+                const tabId = button.getAttribute('data-tab');
+                tabPanels.forEach(panel => {
+                    panel.classList.add('hidden');
+                });
+                document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                
+                // Initialize charts for the selected tab
+                if (tabId === 'overview') {
+                    initMonthlyTrendChart();
+                } else if (tabId === 'daily') {
+                    initHourlyUsageChart();
+                } else if (tabId === 'trends') {
+                    initWeeklyComparisonChart();
+                    initAppTrendsChart();
+                    initGoalAchievementChart();
+                }
+            });
+        });
+        
+        // Calendar day click handler
+        const calendarDays = document.querySelectorAll('.calendar-day');
+        calendarDays.forEach(day => {
+            day.addEventListener('click', () => {
+                // In a real app, this would load data for the selected day
+                // and switch to the daily view tab with that day's data
+                
+                // Get the date from the day element
+                const dayNumber = day.querySelector('.text-sm').textContent;
+                
+                // Update the daily view with the selected date
+                document.querySelector('#daily-tab h3').textContent = `October ${dayNumber}, 2023`;
+                
+                // Switch to daily tab
+                tabButtons.forEach(btn => {
+                    if (btn.getAttribute('data-tab') === 'daily') {
+                        btn.click();
+                    }
+                });
+            });
+        });
+        
+        // Time period change handler
+        document.getElementById('time-period').addEventListener('change', function() {
+            const period = this.value;
+            // In a real app, this would reload data for the selected time period
+            console.log(`Selected time period: ${period}`);
+            
+            // Re-initialize charts with new data
+            initMonthlyTrendChart();
+            if (!document.getElementById('daily-tab').classList.contains('hidden')) {
+                initHourlyUsageChart();
+            }
+            if (!document.getElementById('trends-tab').classList.contains('hidden')) {
+                initWeeklyComparisonChart();
+                initAppTrendsChart();
+                initGoalAchievementChart();
+            }
+        });
+        
+        // ==============================================
+        // CHARTS INITIALIZATION
+        // ==============================================
+        
+        // Initialize charts when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initMonthlyTrendChart();
+            
+            // Animate app usage bars
+            const appUsageBars = document.querySelectorAll('.app-usage-bar');
+            appUsageBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+        
+        // Check for dark mode changes to update charts
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            // Redraw all visible charts
+            if (!document.getElementById('overview-tab').classList.contains('hidden')) {
+                initMonthlyTrendChart();
+            }
+            if (!document.getElementById('daily-tab').classList.contains('hidden')) {
+                initHourlyUsageChart();
+            }
+            if (!document.getElementById('trends-tab').classList.contains('hidden')) {
+                initWeeklyComparisonChart();
+                initAppTrendsChart();
+                initGoalAchievementChart();
+            }
+        });
+        
+        // Monthly Trend Chart
+        function initMonthlyTrendChart() {
+            const ctx = document.getElementById('monthlyTrendChart');
+            if (!ctx) return;
+            
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            // Destroy existing chart if it exists
+            if (window.monthlyTrendChart) {
+                window.monthlyTrendChart.destroy();
+            }
+            
+            window.monthlyTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 31}, (_, i) => i + 1),
+                    datasets: [
+                        {
+                            label: 'Daily Screen Time',
+                            data: [2.1, 4.5, 5.2, 3.8, 4.7, 3.3, 6.4, 2.5, 3.6, 4.2, 3.5, 1.8, 3.3, 5.9, 4.1, 3.4, 2.9, 4.8, 4.3, 3.7, 5.6, 2.4, 4.5, 3.7, 4.2, 1.7, 3.2, 4.5, 3.3, 2.8, 3.4],
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#3b82f6'
+                        },
+                        {
+                            label: 'Daily Goal',
+                            data: Array(31).fill(5),
+                            borderColor: '#65a30d',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: textColor
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Day of Month',
+                                color: textColor
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Hours',
+                                color: textColor
+                            },
+                            min: 0,
+                            max: 8,
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Hourly Usage Chart
+        function initHourlyUsageChart() {
+            const ctx = document.getElementById('hourlyUsageChart');
+            if (!ctx) return;
+            
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            // Destroy existing chart if it exists
+            if (window.hourlyUsageChart) {
+                window.hourlyUsageChart.destroy();
+            }
+            
+            window.hourlyUsageChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM'],
+                    datasets: [{
+                        label: 'Minutes Used',
+                        data: [5, 12, 8, 2, 0, 15, 22, 5, 3, 12, 18, 25, 15, 10, 35, 28, 15, 0],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y} minutes`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Minutes',
+                                color: textColor
+                            },
+                            min: 0,
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Weekly Comparison Chart
+        function initWeeklyComparisonChart() {
+            const ctx = document.getElementById('weeklyComparisonChart');
+            if (!ctx) return;
+            
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            // Destroy existing chart if it exists
+            if (window.weeklyComparisonChart) {
+                window.weeklyComparisonChart.destroy();
+            }
+            
+            window.weeklyComparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        {
+                            label: 'This Week',
+                            data: [3.5, 4.2, 3.8, 4.1, 4.7, 5.4, 2.1],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Last Week',
+                            data: [3.7, 4.5, 4.2, 3.9, 5.2, 5.9, 2.4],
+                            backgroundColor: '#93c5fd',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: textColor
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} hours`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Hours',
+                                color: textColor
+                            },
+                            min: 0,
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // App Trends Chart
+        function initAppTrendsChart() {
+            const ctx = document.getElementById('appTrendsChart');
+            if (!ctx) return;
+            
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            // Destroy existing chart if it exists
+            if (window.appTrendsChart) {
+                window.appTrendsChart.destroy();
+            }
+            
+            window.appTrendsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [
+                        {
+                            label: 'Instagram',
+                            data: [9.2, 8.7, 8.5, 8.2],
+                            borderColor: '#ec4899',
+                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'YouTube',
+                            data: [5.8, 6.2, 6.5, 6.1],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'TikTok',
+                            data: [6.2, 5.1, 4.8, 4.4],
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'WhatsApp',
+                            data: [3.4, 3.5, 3.5, 3.6],
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: textColor
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} hours/week`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Hours per Week',
+                                color: textColor
+                            },
+                            min: 0,
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Goal Achievement Chart
+        function initGoalAchievementChart() {
+            const ctx = document.getElementById('goalAchievementChart');
+            if (!ctx) return;
+            
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            // Destroy existing chart if it exists
+            if (window.goalAchievementChart) {
+                window.goalAchievementChart.destroy();
+            }
+            
+            window.goalAchievementChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['August', 'September', 'October'],
+                    datasets: [
+                        {
+                            label: 'Goal Achievement (%)',
+                            data: [45, 58, 68],
+                            backgroundColor: ['#22c55e', '#3b82f6', '#a855f7'],
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y}% of days within limit`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Goal Achievement Rate (%)',
+                                color: textColor
+                            },
+                            min: 0,
+                            max: 100,
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <!-- 
+    *** SERVER-SIDE CODE (PHP/SQL) ***
+    This section shows how the history data would be retrieved and processed on a real server.
+    This code won't run in the Poe Canvas but demonstrates the structure.
+    
+    *** history.php ***
+    <?php
+    session_start();
+    require_once 'database.php';
+
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: login.php');
+        exit;
+    }
+
+    $user_id = $_SESSION['user_id'];
+    $first_name = $_SESSION['first_name'];
+    $last_name = $_SESSION['last_name'];
+    
+    // Get time period from request (default to month)
+    $time_period = $_GET['period'] ?? 'month';
+    
+    // Get date range based on time period
+    $today = new DateTime();
+    $end_date = $today->format('Y-m-d');
+    
+    switch ($time_period) {
+        case 'week':
+            $start_date = (clone $today)->modify('-7 days')->format('Y-m-d');
+            $period_label = 'This Week';
+            break;
+        case '3month':
+            $start_date = (clone $today)->modify('-3 months')->format('Y-m-d');
+            $period_label = 'Last 3 Months';
+            break;
+        case '6month':
+            $start_date = (clone $today)->modify('-6 months')->format('Y-m-d');
+            $period_label = 'Last 6 Months';
+            break;
+        case 'year':
+            $start_date = (clone $today)->modify('-1 year')->format('Y-m-d');
+            $period_label = 'This Year';
+            break;
+        case 'month':
+        default:
+            $start_date = (clone $today)->modify('first day of this month')->format('Y-m-d');
+            $period_label = 'This Month';
+            break;
+    }
+    
+    // Get user's screen time limit
+    $stmt = $pdo->prepare("SELECT screen_time_limit FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $screen_time_limit = $stmt->fetchColumn();
+    
+    // Get average daily screen time for the period
+    $stmt = $pdo->prepare("
+        SELECT AVG(total_time) as avg_time
+        FROM screen_time_logs
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+    ");
+    $stmt->execute([$user_id, $start_date, $end_date]);
+    $avg_screen_time = $stmt->fetchColumn() ?: 0;
+    
+    // Get average from previous period for comparison
+    $prev_start_date = '';
+    $prev_end_date = '';
+    
+    switch ($time_period) {
+        case 'week':
+            $prev_start_date = (clone $today)->modify('-14 days')->format('Y-m-d');
+            $prev_end_date = (clone $today)->modify('-8 days')->format('Y-m-d');
+            break;
+        case '3month':
+            $prev_start_date = (clone $today)->modify('-6 months')->format('Y-m-d');
+            $prev_end_date = (clone $today)->modify('-3 months -1 day')->format('Y-m-d');
+            break;
+        case '6month':
+            $prev_start_date = (clone $today)->modify('-12 months')->format('Y-m-d');
+            $prev_end_date = (clone $today)->modify('-6 months -1 day')->format('Y-m-d');
+            break;
+        case 'year':
+            $prev_start_date = (clone $today)->modify('-2 years')->format('Y-m-d');
+            $prev_end_date = (clone $today)->modify('-1 year -1 day')->format('Y-m-d');
+            break;
+        case 'month':
+        default:
+            $prev_start_date = (clone $today)->modify('first day of last month')->format('Y-m-d');
+            $prev_end_date = (clone $today)->modify('last day of last month')->format('Y-m-d');
+            break;
+    }
+    
+    $stmt = $pdo->prepare("
+        SELECT AVG(total_time) as avg_time
+        FROM screen_time_logs
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+    ");
+    $stmt->execute([$user_id, $prev_start_date, $prev_end_date]);
+    $prev_avg_screen_time = $stmt->fetchColumn() ?: 0;
+    
+    $avg_change_percent = 0;
+    if ($prev_avg_screen_time > 0) {
+        $avg_change_percent = (($avg_screen_time - $prev_avg_screen_time) / $prev_avg_screen_time) * 100;
+    }
+    
+    // Get goal achievement days
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count
+        FROM screen_time_logs
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+        AND total_time <= ?
+    ");
+    $stmt->execute([$user_id, $start_date, $end_date, $screen_time_limit]);
+    $goal_achievement_days = $stmt->fetchColumn() ?: 0;
+    
+    // Get total days in period
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count
+        FROM screen_time_logs
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+    ");
+    $stmt->execute([$user_id, $start_date, $end_date]);
+    $total_days = $stmt->fetchColumn() ?: 1; // Avoid division by zero
+    
+    $goal_achievement_rate = ($goal_achievement_days / $total_days) * 100;
+    
+    // Get top apps
+    $stmt = $pdo->prepare("
+        SELECT app_name, SUM(usage_time) as total_time
+        FROM app_usage
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+        GROUP BY app_name
+        ORDER BY total_time DESC
+        LIMIT 3
+    ");
+    $stmt->execute([$user_id, $start_date, $end_date]);
+    $top_apps = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Calculate percentages
+    $stmt = $pdo->prepare("
+        SELECT SUM(usage_time) as total_app_time
+        FROM app_usage
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+    ");
+    $stmt->execute([$user_id, $start_date, $end_date]);
+    $total_app_time = $stmt->fetchColumn() ?: 1; // Avoid division by zero
+    
+    foreach ($top_apps as &$app) {
+        $app['percentage'] = ($app['total_time'] / $total_app_time) * 100;
+    }
+    
+    // Get daily data for calendar view
+    $current_month = $today->format('Y-m');
+    $current_month_start = $current_month . '-01';
+    $current_month_end = date('Y-m-t', strtotime($current_month_start));
+    
+    $stmt = $pdo->prepare("
+        SELECT DAY(log_date) as day, total_time, goal_met
+        FROM screen_time_logs
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+    ");
+    $stmt->execute([$user_id, $current_month_start, $current_month_end]);
+    $calendar_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Format calendar data for JavaScript
+    $formatted_calendar_data = [];
+    $days_in_month = date('t', strtotime($current_month_start));
+    
+    for ($i = 1; $i <= $days_in_month; $i++) {
+        $found = false;
+        foreach ($calendar_data as $day) {
+            if ($day['day'] == $i) {
+                $formatted_calendar_data[] = [
+                    'day' => $i,
+                    'screenTime' => round($day['total_time'], 1),
+                    'goalMet' => (bool)$day['goal_met']
+                ];
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            $formatted_calendar_data[] = [
+                'day' => $i,
+                'screenTime' => 0,
+                'goalMet' => true
+            ];
+        }
+    }
+    
+    // Get monthly trend data
+    $stmt = $pdo->prepare("
+        SELECT log_date, total_time
+        FROM screen_time_logs
+        WHERE user_id = ?
+        AND log_date BETWEEN ? AND ?
+        ORDER BY log_date
+    ");
+    $stmt->execute([$user_id, $current_month_start, $current_month_end]);
+    $monthly_trend_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $formatted_monthly_trend = [];
+    foreach ($monthly_trend_data as $day) {
+        $day_num = date('j', strtotime($day['log_date']));
+        $formatted_monthly_trend[$day_num - 1] = round($day['total_time'], 1);
+    }
+    
+    // Convert PHP arrays to JSON for JavaScript
+    $calendar_data_json = json_encode($formatted_calendar_data);
+    $monthly_trend_json = json_encode($formatted_monthly_trend);
+    $top_apps_json = json_encode($top_apps);
+    ?>
+
+    *** SQL Schema Additions for History Page ***
+    /* These would be added to the previous schema */
+    
+    /* Table for detailed hourly usage */
+    CREATE TABLE hourly_usage (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        log_date DATE NOT NULL,
+        hour_of_day TINYINT NOT NULL, /* 0-23 */
+        minutes_used INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE KEY user_date_hour (user_id, log_date, hour_of_day)
+    );
+    
+    /* Table for device pickups */
+    CREATE TABLE device_pickups (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        log_date DATE NOT NULL,
+        pickup_count INT NOT NULL,
+        first_pickup_time TIME,
+        last_usage_time TIME,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE KEY user_date (user_id, log_date)
+    );
+    
+    /* Table for notification tracking */
+    CREATE TABLE notifications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        log_date DATE NOT NULL,
+        app_name VARCHAR(100) NOT NULL,
+        notification_count INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    
+    /* Table for streak tracking */
+    CREATE TABLE goal_streaks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        streak_start_date DATE NOT NULL,
+        streak_end_date DATE NOT NULL,
+        streak_days INT NOT NULL,
+        is_current BOOLEAN NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    -->
+</body>
+</html>

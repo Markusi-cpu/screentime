@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenBalance | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6', // deeper blue
+                        'primary-light': '#f0f7ff', // pale blue
+                        'text-dark': '#1e3a8a', // navy blue
+                        'text-body': '#333333', // dark gray
+                        'accent-green': '#65a30d', // lime green
+                        'accent-orange': '#f97316', // orange
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        /* Custom CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom progress animation */
+        @keyframes fillProgress {
+            from { width: 0; }
+            to { width: var(--fill-width); }
+        }
+        .progress-bar {
+            animation: fillProgress 1.5s ease-out forwards;
+        }
+
+        /* Dark mode styles */
+        .dark body {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+        .dark .bg-primary-light {
+            background-color: #1e293b;
+        }
+        .dark .text-text-body {
+            color: #d1d5db;
+        }
+        .dark .text-text-dark {
+            color: #e5e7eb;
+        }
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+        .dark .shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="font-sans bg-primary-light dark:bg-gray-900 text-text-body min-h-screen">
+    <!-- Login Page View -->
+    <div id="login-view" class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="text-center">
+                <div class="text-primary dark:text-blue-400 text-4xl font-bold inline-flex items-center">
+                    <i class="fas fa-balance-scale-right mr-2"></i>
+                    ScreenBalance
+                </div>
+                <h2 class="mt-6 text-3xl font-extrabold text-text-dark dark:text-white">
+                    Sign in to your account
+                </h2>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Or <a href="signup.html" id="register-link" class="font-medium text-primary hover:text-blue-600 dark:hover:text-blue-400">
+                        create a new account
+                    </a>
+                </p>
+            </div>
+
+            <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <div id="login-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
+                        <div class="flex">
+                            <i class="fas fa-exclamation-circle mr-2 mt-1"></i>
+                            <div>
+                                <p class="font-bold">Error</p>
+                                <p id="error-message">Invalid username or password. Please try again.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="login-form" class="space-y-6">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Username or Email
+                            </label>
+                            <div class="mt-1">
+                                <input id="username" name="username" type="text" autocomplete="username" required 
+                                    class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Password
+                            </label>
+                            <div class="mt-1 relative">
+                                <input id="password" name="password" type="password" autocomplete="current-password" required 
+                                    class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white text-base">
+                                <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" name="remember-me" type="checkbox" 
+                                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                    Remember me
+                                </label>
+                            </div>
+
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-primary hover:text-blue-600 dark:hover:text-blue-400">
+                                    Forgot your password?
+                                </a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" id="login-button" 
+                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <span>Sign in</span>
+                                <div id="loading-spinner" class="hidden ml-2">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-6">
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                                    Or continue with
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 grid grid-cols-2 gap-3">
+                            <div>
+                                <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <i class="fab fa-google text-red-600 dark:text-red-400"></i>
+                                    <span class="ml-2">Google</span>
+                                </a>
+                            </div>
+                            <div>
+                                <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <i class="fab fa-apple text-gray-800 dark:text-gray-200"></i>
+                                    <span class="ml-2">Apple</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page View (Initially Hidden) -->
+    <div id="home-view" class="hidden min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <!-- Logo -->
+                        <div class="flex-shrink-0 flex items-center">
+                            <div class="text-primary dark:text-blue-400 text-2xl font-bold">
+                                <i class="fas fa-balance-scale-right mr-2"></i>
+                                ScreenBalance
+                            </div>
+                        </div>
+                        <!-- Desktop Navigation Links -->
+                        <div class="hidden md:ml-6 md:flex md:space-x-8">
+                            <a href="#" class="border-b-2 border-primary text-text-dark dark:text-white font-medium text-base px-1 pt-1 border-b-2">Dashboard</a>
+                            <a href="#" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Tools</a>
+                            <a href="resources.html" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Resources</a>
+                            <a href="history.html" id="history-link" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">History</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <!-- User Menu -->
+                        <div class="ml-3 relative">
+                            <div>
+                                <button id="user-menu-button" class="bg-white dark:bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <span class="sr-only">Open user menu</span>
+                                    <div class="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                        <span id="user-initials">JS</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-user mr-2"></i> Your Profile
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-cog mr-2"></i> Settings
+                                </a>
+                                <a href="#" id="signout-button" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Sign out
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile menu button -->
+                        <div class="flex md:hidden ml-4">
+                            <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-text-dark dark:text-gray-400 hover:text-primary hover:bg-primary-light dark:hover:bg-gray-700 focus:outline-none">
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#" class="bg-primary-light dark:bg-gray-900 text-primary dark:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Tools</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Resources</a>
+                    <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">History</a>
+                </div>
+                <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center px-5">
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                                <span id="mobile-user-initials">JS</span>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div id="mobile-user-name" class="text-base font-medium leading-none text-text-dark dark:text-white">John Smith</div>
+                            <div id="mobile-user-email" class="text-sm font-medium leading-none text-gray-500 dark:text-gray-400 mt-1">john.smith@example.com</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 px-2 space-y-1">
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Your Profile</a>
+                        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Settings</a>
+                        <a href="#" id="mobile-signout-button" class="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white">Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <!-- Welcome Section -->
+            <div class="bg-primary dark:bg-gray-800 py-6">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h1 id="welcome-message" class="text-2xl font-bold text-white">Welcome back, John!</h1>
+                    <p class="mt-1 text-sm text-blue-100 dark:text-gray-300">Here's your screen time overview</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Screen Time Overview -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
+                        <h2 class="text-lg font-semibold text-text-dark dark:text-white mb-4">Today's Screen Time</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Total Time Card -->
+                            <div class="bg-primary-light dark:bg-gray-700 p-4 rounded-lg">
+                                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Screen Time</h3>
+                                <p id="total-screen-time" class="mt-1 text-3xl font-semibold text-text-dark dark:text-white">3h 25m</p>
+                                <div class="mt-3">
+                                    <div class="relative pt-1">
+                                        <div class="overflow-hidden h-2 mb-1 text-xs flex rounded bg-blue-200 dark:bg-gray-600">
+                                            <div style="--fill-width: 65%" class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="text-xs font-semibold inline-block text-primary dark:text-blue-400">
+                                                    65% of your daily limit
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Most Used App Card -->
+                            <div class="bg-primary-light dark:bg-gray-700 p-4 rounded-lg">
+                                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Most Used App</h3>
+                                <p id="most-used-app" class="mt-1 text-2xl font-semibold text-text-dark dark:text-white">Instagram</p>
+                                <p id="most-used-time" class="text-lg font-medium text-gray-600 dark:text-gray-300">1h 15m</p>
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100">
+                                        <i class="fas fa-arrow-up mr-1"></i> 15% from yesterday
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Focus Sessions Card -->
+                            <div class="bg-primary-light dark:bg-gray-700 p-4 rounded-lg">
+                                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Focus Sessions</h3>
+                                <p id="focus-sessions" class="mt-1 text-3xl font-semibold text-text-dark dark:text-white">2</p>
+                                <p id="focus-duration" class="text-lg font-medium text-gray-600 dark:text-gray-300">Total: 1h 30m</p>
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                        <i class="fas fa-check mr-1"></i> On track
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Overview -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-white dark:bg-gray-800">
+                            <h2 class="text-lg font-semibold text-text-dark dark:text-white">Weekly Overview</h2>
+                            <div class="h-64 mt-4">
+                                <canvas id="weeklyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Usage Breakdown -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-white dark:bg-gray-800">
+                            <h2 class="text-lg font-semibold text-text-dark dark:text-white mb-4">App Usage Breakdown</h2>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Application
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Time Used
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                % of Total
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Trend
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" id="app-usage-tbody">
+                                        <!-- Dynamic content will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- History View (Initially Hidden) -->
+        <div id="history-view" class="hidden">
+            <div class="bg-primary dark:bg-gray-800 py-6">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h1 class="text-2xl font-bold text-white">Your Usage History</h1>
+                    <p class="mt-1 text-sm text-blue-100 dark:text-gray-300">Track your screen time patterns over time</p>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Month Selector -->
+                <div class="px-4 sm:px-0 mb-6">
+                    <div class="flex justify-between items-center">
+                        <button id="prev-month" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                            <i class="fas fa-chevron-left text-text-dark dark:text-white"></i>
+                        </button>
+                        <h2 id="current-month" class="text-xl font-bold text-text-dark dark:text-white">October 2023</h2>
+                        <button id="next-month" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                            <i class="fas fa-chevron-right text-text-dark dark:text-white"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calendar View -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-white dark:bg-gray-800">
+                            <div class="grid grid-cols-7 gap-2 text-center mb-2">
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Sun</div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Mon</div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Tue</div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Wed</div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Thu</div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Fri</div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Sat</div>
+                            </div>
+                            <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                                <!-- Calendar days will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Trend Chart -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-white dark:bg-gray-800">
+                            <h2 class="text-lg font-semibold text-text-dark dark:text-white mb-4">Monthly Usage Trend</h2>
+                            <div class="h-64">
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ==============================================
+        // AUTHENTICATION SIMULATION
+        // ==============================================
+        
+        // For demonstration purposes only
+        // In a real app, this would be handled by PHP/SQL on the server
+        const DEMO_USERS = [
+            {
+                username: 'john.smith',
+                email: 'john.smith@example.com',
+                password: 'password123', // In real app, this would be hashed
+                firstName: 'John',
+                lastName: 'Smith',
+                screenTimeLimit: 5, // in hours
+                screenTimeToday: 3.42, // in hours
+                focusSessions: 2,
+                focusDuration: 90, // in minutes
+                mostUsedApp: 'Instagram',
+                mostUsedTime: 75, // in minutes
+                appUsage: [
+                    { name: 'Instagram', time: 75, percentage: 36.5, trend: 'up' },
+                    { name: 'YouTube', time: 45, percentage: 21.9, trend: 'down' },
+                    { name: 'TikTok', time: 38, percentage: 18.5, trend: 'up' },
+                    { name: 'Chrome', time: 32, percentage: 15.6, trend: 'same' },
+                    { name: 'Snapchat', time: 15, percentage: 7.3, trend: 'down' }
+                ],
+                weeklyData: [4.2, 3.8, 4.5, 2.9, 3.2, 2.7, 3.4], // hours per day for the last week
+                historyData: {
+                    // Monthly usage data simulation
+                    // This would be populated from the database in a real application
+                    '2023-10': {
+                        days: Array.from({ length: 31 }, (_, i) => {
+                            return {
+                                day: i + 1,
+                                screenTime: Math.random() * 6 + 1, // 1-7 hours
+                                goalMet: Math.random() > 0.3 // 70% chance of meeting goal
+                            };
+                        }),
+                        weeklyTrends: [
+                            { week: 'Week 1', average: 4.2 },
+                            { week: 'Week 2', average: 3.7 },
+                            { week: 'Week 3', average: 3.9 },
+                            { week: 'Week 4', average: 3.5 }
+                        ]
+                    }
+                }
+            },
+            {
+                username: 'jane.doe',
+                email: 'jane.doe@example.com',
+                password: 'password123',
+                firstName: 'Jane',
+                lastName: 'Doe',
+                screenTimeLimit: 4, // in hours
+                screenTimeToday: 2.75, // in hours
+                focusSessions: 3,
+                focusDuration: 120, // in minutes
+                mostUsedApp: 'TikTok',
+                mostUsedTime: 60, // in minutes
+                appUsage: [
+                    { name: 'TikTok', time: 60, percentage: 36.4, trend: 'up' },
+                    { name: 'Instagram', time: 45, percentage: 27.3, trend: 'down' },
+                    { name: 'Spotify', time: 30, percentage: 18.2, trend: 'same' },
+                    { name: 'WhatsApp', time: 20, percentage: 12.1, trend: 'up' },
+                    { name: 'Safari', time: 10, percentage: 6.1, trend: 'down' }
+                ],
+                weeklyData: [3.5, 2.9, 3.2, 2.5, 2.8, 3.1, 2.7], // hours per day for the last week
+                historyData: {
+                    // Similar structure to John's history data
+                    '2023-10': {
+                        days: Array.from({ length: 31 }, (_, i) => {
+                            return {
+                                day: i + 1,
+                                screenTime: Math.random() * 5 + 1, // 1-6 hours
+                                goalMet: Math.random() > 0.25 // 75% chance of meeting goal
+                            };
+                        }),
+                        weeklyTrends: [
+                            { week: 'Week 1', average: 3.6 },
+                            { week: 'Week 2', average: 3.2 },
+                            { week: 'Week 3', average: 3.0 },
+                            { week: 'Week 4', average: 2.8 }
+                        ]
+                    }
+                }
+            }
+        ];
+
+        // Current user data
+        let currentUser = null;
+
+        // ==============================================
+        // EVENT LISTENERS AND UI INTERACTIONS
+        // ==============================================
+
+        // Login form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember-me').checked;
+            
+            // Show loading state
+            const loginButton = document.getElementById('login-button');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            loginButton.querySelector('span').textContent = 'Signing in...';
+            loadingSpinner.classList.remove('hidden');
+            
+            // Simulate network delay
+            setTimeout(() => {
+                // Authenticate user
+                const user = DEMO_USERS.find(u => 
+                    (u.username === username || u.email === username) && 
+                    u.password === password
+                );
+                
+                if (user) {
+                    // Login success
+                    currentUser = user;
+                    showHomePage();
+                } else {
+                    // Login failed
+                    document.getElementById('login-error').classList.remove('hidden');
+                    document.getElementById('error-message').textContent = 'Invalid username or password. Please try again.';
+                    
+                    // Reset button state
+                    loginButton.querySelector('span').textContent = 'Sign in';
+                    loadingSpinner.classList.add('hidden');
+                }
+            }, 1000);
+        });
+
+        // Toggle password visibility
+        document.getElementById('toggle-password').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.remove('fa-eye');
+                passwordIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+            }
+        });
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('user-menu-button')?.addEventListener('click', function() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Sign out buttons
+        document.getElementById('signout-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            signOutUser();
+        });
+
+        document.getElementById('mobile-signout-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            signOutUser();
+        });
+
+        // History view toggle
+        document.getElementById('history-link')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const dashboardView = document.querySelector('main');
+            const historyView = document.getElementById('history-view');
+            
+            if (historyView.classList.contains('hidden')) {
+                dashboardView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                setupHistoryView();
+            } else {
+                historyView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+            }
+        });
+
+        // Month navigation for history view
+        document.getElementById('prev-month')?.addEventListener('click', function() {
+            // In a real app, this would load the previous month's data
+            alert('Previous month functionality would be implemented here');
+        });
+
+        document.getElementById('next-month')?.addEventListener('click', function() {
+            // In a real app, this would load the next month's data
+            alert('Next month functionality would be implemented here');
+        });
+
+        // ==============================================
+        // HELPER FUNCTIONS
+        // ==============================================
+
+        // Show the home page with user data
+        function showHomePage() {
+            // Hide login view, show home view
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('home-view').classList.remove('hidden');
+            
+            // Update user interface with current user data
+            updateUserInterface();
+            
+            // Setup charts
+            setupWeeklyChart();
+            fillAppUsageTable();
+        }
+
+        // Sign out the current user
+        function signOutUser() {
+            currentUser = null;
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('history-view').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+            
+            // Reset login form
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('login-button').querySelector('span').textContent = 'Sign in';
+            document.getElementById('loading-spinner').classList.add('hidden');
+        }
+
+        // Update the user interface with current user's data
+        function updateUserInterface() {
+            if (!currentUser) return;
+            
+            // Update welcome message
+            document.getElementById('welcome-message').textContent = `Welcome back, ${currentUser.firstName}!`;
+            
+            // Update user information
+            document.getElementById('user-initials').textContent = `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`;
+            document.getElementById('mobile-user-initials').textContent = `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`;
+            document.getElementById('mobile-user-name').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            document.getElementById('mobile-user-email').textContent = currentUser.email;
+            
+            // Update dashboard data
+            document.getElementById('total-screen-time').textContent = formatHoursMinutes(currentUser.screenTimeToday);
+            document.getElementById('most-used-app').textContent = currentUser.mostUsedApp;
+            document.getElementById('most-used-time').textContent = formatHoursMinutes(currentUser.mostUsedTime / 60);
+            document.getElementById('focus-sessions').textContent = currentUser.focusSessions;
+            document.getElementById('focus-duration').textContent = `Total: ${formatHoursMinutes(currentUser.focusDuration / 60)}`;
+            
+            // Update progress bar
+            const progressBar = document.querySelector('.progress-bar');
+            const percentage = (currentUser.screenTimeToday / currentUser.screenTimeLimit) * 100;
+            progressBar.style.setProperty('--fill-width', `${percentage}%`);
+            document.querySelector('.text-xs.font-semibold.inline-block.text-primary').textContent = 
+                `${Math.round(percentage)}% of your daily limit`;
+        }
+
+        // Setup the weekly overview chart
+        function setupWeeklyChart() {
+            if (!currentUser) return;
+            
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            
+            // Check if dark mode is enabled
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            
+            const weeklyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Screen Time (hours)',
+                        data: currentUser.weeklyData,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3b82f6',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(...currentUser.weeklyData) * 1.2,
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fill the app usage table with data
+        function fillAppUsageTable() {
+            if (!currentUser) return;
+            
+            const tbody = document.getElementById('app-usage-tbody');
+            tbody.innerHTML = '';
+            
+            currentUser.appUsage.forEach(app => {
+                const row = document.createElement('tr');
+                
+                // Trend icon
+                let trendIcon, trendClass;
+                if (app.trend === 'up') {
+                    trendIcon = 'fa-arrow-up';
+                    trendClass = 'text-orange-600 dark:text-orange-400';
+                } else if (app.trend === 'down') {
+                    trendIcon = 'fa-arrow-down';
+                    trendClass = 'text-green-600 dark:text-green-400';
+                } else {
+                    trendIcon = 'fa-equals';
+                    trendClass = 'text-gray-600 dark:text-gray-400';
+                }
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-dark dark:text-white">
+                        ${app.name}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        ${formatHoursMinutes(app.time / 60)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        ${app.percentage.toFixed(1)}%
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${trendClass}">
+                            <i class="fas ${trendIcon} mr-1"></i> ${app.trend}
+                        </span>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Setup history view with calendar and chart
+        function setupHistoryView() {
+            if (!currentUser || !currentUser.historyData) return;
+            
+            const currentMonthData = currentUser.historyData['2023-10'];
+            if (!currentMonthData) return;
+            
+            // Setup calendar
+            setupCalendar(currentMonthData.days);
+            
+            // Setup monthly chart
+            setupMonthlyChart(currentMonthData.weeklyTrends);
+        }
+
+        // Setup monthly calendar view
+        function setupCalendar(daysData) {
+            const calendarGrid = document.getElementById('calendar-grid');
+            calendarGrid.innerHTML = '';
+            
+            // Get first day of month (assuming October 2023)
+            const firstDay = new Date(2023, 9, 1).getDay(); // 0-6, Sunday is 0
+            
+            // Add empty cells for days before first day of month
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'h-12';
+                calendarGrid.appendChild(emptyCell);
+            }
+            
+            // Add days of the month
+            daysData.forEach(day => {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'h-12 flex flex-col items-center justify-center rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
+                
+                // Color code based on screen time relative to limit
+                let colorClass;
+                if (day.goalMet) {
+                    colorClass = 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300';
+                } else {
+                    colorClass = 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-300';
+                }
+                
+                dayCell.innerHTML = `
+                    <div class="text-sm font-medium text-text-dark dark:text-white">${day.day}</div>
+                    <div class="text-xs ${colorClass} px-1.5 py-0.5 rounded-full mt-1">
+                        ${day.screenTime.toFixed(1)}h
+                    </div>
+                `;
+                
+                dayCell.addEventListener('click', () => {
+                    // In a real app, this would show detailed data for the selected day
+                    alert(`Detail view for October ${day.day}, 2023 would show here`);
+                });
+                
+                calendarGrid.appendChild(dayCell);
+            });
+        }
+
+        // Setup monthly trend chart
+        function setupMonthlyChart(weeklyTrends) {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            // Check if dark mode is enabled
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            
+            const labels = weeklyTrends.map(week => week.week);
+            const data = weeklyTrends.map(week => week.average);
+            
+            const monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Screen Time (hours/day)',
+                        data: data,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(...data) * 1.2,
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Format hours and minutes (e.g. 3.5 -> "3h 30m")
+        function formatHoursMinutes(hours) {
+            const h = Math.floor(hours);
+            const m = Math.round((hours - h) * 60);
+            return `${h}h ${m}m`;
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const button = document.getElementById('user-menu-button');
+            
+            if (dropdown && !dropdown.classList.contains('hidden') && !button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Listen for dark mode changes to update charts
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (currentUser) {
+                setupWeeklyChart();
+                if (!document.getElementById('history-view').classList.contains('hidden')) {
+                    setupMonthlyChart(currentUser.historyData['2023-10'].weeklyTrends);
+                }
+            }
+        });
+    </script>
+
+    <!-- 
+    *** SERVER-SIDE CODE (PHP/SQL) ***
+    This section shows how the authentication would be implemented on a real server.
+    This code won't run in the Poe Canvas but demonstrates the structure.
+    
+    *** database.php ***
+    <?php
+    $host = 'localhost';
+    $db   = 'screen_time_app';
+    $user = 'dbuser';
+    $pass = 'dbpassword';
+    $charset = 'utf8mb4';
+
+    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+
+    try {
+        $pdo = new PDO($dsn, $user, $pass, $options);
+    } catch (\PDOException $e) {
+        throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    }
+    ?>
+
+    *** SQL Schema Creation ***
+    CREATE TABLE users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        first_name VARCHAR(50) NOT NULL,
+        last_name VARCHAR(50) NOT NULL,
+        screen_time_limit FLOAT NOT NULL DEFAULT 5.0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE screen_time_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        log_date DATE NOT NULL,
+        total_time FLOAT NOT NULL,
+        goal_met BOOLEAN NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE KEY user_date (user_id, log_date)
+    );
+
+    CREATE TABLE app_usage (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        log_date DATE NOT NULL,
+        app_name VARCHAR(100) NOT NULL,
+        usage_time FLOAT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    CREATE TABLE focus_sessions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        session_date DATE NOT NULL,
+        duration INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    *** login.php ***
+    <?php
+    session_start();
+    require_once 'database.php';
+
+    // Check if user is already logged in
+    if (isset($_SESSION['user_id'])) {
+        header('Location: home.php');
+        exit;
+    }
+
+    $error = '';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $remember = isset($_POST['remember-me']);
+        
+        if (empty($username) || empty($password)) {
+            $error = 'Please fill in all fields.';
+        } else {
+            // Check if input is email or username
+            $sql = "SELECT id, username, email, password_hash, first_name, last_name 
+                    FROM users 
+                    WHERE username = :username OR email = :email";
+                    
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(['username' => $username, 'email' => $username]);
+            $user = $stmt->fetch();
+            
+            if ($user && password_verify($password, $user['password_hash'])) {
+                // Login successful
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['first_name'] = $user['first_name'];
+                $_SESSION['last_name'] = $user['last_name'];
+                
+                // Set remember me cookie if requested
+                if ($remember) {
+                    $token = bin2hex(random_bytes(16));
+                    $token_hash = password_hash($token, PASSWORD_DEFAULT);
+                    
+                    // Store token in database
+                    $sql = "INSERT INTO auth_tokens (user_id, token_hash, expires_at) 
+                            VALUES (:user_id, :token_hash, DATE_ADD(NOW(), INTERVAL 30 DAY))";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        'user_id' => $user['id'],
+                        'token_hash' => $token_hash
+                    ]);
+                    
+                    // Set cookie
+                    setcookie('remember_token', $token, time() + 86400 * 30, '/');
+                }
+                
+                header('Location: home.php');
+                exit;
+            } else {
+                $error = 'Invalid username or password. Please try again.';
+            }
+        }
+    }
+    ?>
+
+    *** home.php ***
+    <?php
+    session_start();
+    require_once 'database.php';
+
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: login.php');
+        exit;
+    }
+
+    // Get user data
+    $user_id = $_SESSION['user_id'];
+    $first_name = $_SESSION['first_name'];
+    $last_name = $_SESSION['last_name'];
+
+    // Get today's screen time data
+    $today = date('Y-m-d');
+    $sql = "SELECT total_time, goal_met FROM screen_time_logs WHERE user_id = :user_id AND log_date = :today";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $user_id, 'today' => $today]);
+    $today_data = $stmt->fetch();
+
+    // Get screen time limit
+    $sql = "SELECT screen_time_limit FROM users WHERE id = :user_id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $user_id]);
+    $user_data = $stmt->fetch();
+    $screen_time_limit = $user_data['screen_time_limit'];
+
+    // Get focus sessions for today
+    $sql = "SELECT COUNT(*) as session_count, SUM(duration) as total_duration
+            FROM focus_sessions 
+            WHERE user_id = :user_id AND session_date = :today";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $user_id, 'today' => $today]);
+    $focus_data = $stmt->fetch();
+
+    // Get app usage breakdown
+    $sql = "SELECT app_name, usage_time
+            FROM app_usage
+            WHERE user_id = :user_id AND log_date = :today
+            ORDER BY usage_time DESC";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $user_id, 'today' => $today]);
+    $app_usage = $stmt->fetchAll();
+
+    // Get weekly data
+    $sql = "SELECT log_date, total_time
+            FROM screen_time_logs
+            WHERE user_id = :user_id AND log_date BETWEEN DATE_SUB(:today, INTERVAL 6 DAY) AND :today
+            ORDER BY log_date";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $user_id, 'today' => $today]);
+    $weekly_data = $stmt->fetchAll();
+
+    // JSON encode data for JavaScript use
+    $screen_time_data = json_encode([
+        'today' => $today_data['total_time'] ?? 0,
+        'limit' => $screen_time_limit,
+        'goal_met' => $today_data['goal_met'] ?? false,
+        'focus_sessions' => $focus_data['session_count'] ?? 0,
+        'focus_duration' => $focus_data['total_duration'] ?? 0,
+        'app_usage' => $app_usage,
+        'weekly_data' => $weekly_data
+    ]);
+    ?>
+
+    *** logout.php ***
+    <?php
+    session_start();
+
+    // Delete remember me cookie if it exists
+    if (isset($_COOKIE['remember_token'])) {
+        // Delete token from database
+        require_once 'database.php';
+        $token = $_COOKIE['remember_token'];
+        $sql = "DELETE FROM auth_tokens WHERE user_id = :user_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['user_id' => $_SESSION['user_id']]);
+        
+        // Delete cookie
+        setcookie('remember_token', '', time() - 3600, '/');
+    }
+
+    // Clear all session variables
+    $_SESSION = [];
+
+    // Destroy the session
+    session_destroy();
+
+    // Redirect to login page
+    header('Location: login.php');
+    exit;
+    ?>
+
+    *** get_history.php ***
+    <?php
+    session_start();
+    require_once 'database.php';
+
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
+    }
+
+    $user_id = $_SESSION['user_id'];
+    $month = $_GET['month'] ?? date('Y-m');
+    
+    // Validate month format (YYYY-MM)
+    if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid month format']);
+        exit;
+    }
+    
+    // Extract year and month
+    list($year, $month_num) = explode('-', $month);
+    
+    // Get days in month
+    $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month_num, $year);
+    
+    // Get daily data for the month
+    $sql = "SELECT DAY(log_date) as day, total_time, goal_met
+            FROM screen_time_logs
+            WHERE user_id = :user_id 
+            AND YEAR(log_date) = :year 
+            AND MONTH(log_date) = :month";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        'user_id' => $user_id,
+        'year' => $year,
+        'month' => $month_num
+    ]);
+    $daily_data = $stmt->fetchAll();
+    
+    // Format data for calendar
+    $calendar_data = [];
+    for ($i = 1; $i <= $days_in_month; $i++) {
+        $found = false;
+        foreach ($daily_data as $day) {
+            if ($day['day'] == $i) {
+                $calendar_data[] = [
+                    'day' => $i,
+                    'screenTime' => $day['total_time'],
+                    'goalMet' => (bool)$day['goal_met']
+                ];
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            $calendar_data[] = [
+                'day' => $i,
+                'screenTime' => 0,
+                'goalMet' => true
+            ];
+        }
+    }
+    
+    // Get weekly averages
+    $weekly_trends = [];
+    for ($week = 1; $week <= 4; $week++) {
+        $start_day = ($week - 1) * 7 + 1;
+        $end_day = min($start_day + 6, $days_in_month);
+        
+        $sql = "SELECT AVG(total_time) as average
+                FROM screen_time_logs
+                WHERE user_id = :user_id 
+                AND YEAR(log_date) = :year 
+                AND MONTH(log_date) = :month
+                AND DAY(log_date) BETWEEN :start_day AND :end_day";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            'user_id' => $user_id,
+            'year' => $year,
+            'month' => $month_num,
+            'start_day' => $start_day,
+            'end_day' => $end_day
+        ]);
+        $avg = $stmt->fetchColumn();
+        
+        $weekly_trends[] = [
+            'week' => "Week $week",
+            'average' => $avg ?: 0
+        ];
+    }
+    
+    // Return JSON response
+    header('Content-Type: application/json');
+    echo json_encode([
+        'days' => $calendar_data,
+        'weeklyTrends' => $weekly_trends
+    ]);
+    ?>
+    -->
+</body>
+</html>

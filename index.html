@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenBalance | Healthy Digital Habits for Students</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6', // deeper blue
+                        'primary-light': '#f0f7ff', // pale blue
+                        'text-dark': '#1e3a8a', // navy blue
+                        'text-body': '#333333', // dark gray
+                        'accent-green': '#65a30d', // lime green
+                        'accent-orange': '#f97316', // orange
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        /* Custom CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .tip-card {
+            transition: all 0.3s ease;
+        }
+        .tip-card:hover {
+            transform: scale(1.02);
+        }
+
+        /* Custom progress animation */
+        @keyframes fillProgress {
+            from { width: 0; }
+            to { width: var(--fill-width); }
+        }
+        .progress-bar {
+            animation: fillProgress 1.5s ease-out forwards;
+        }
+
+        /* Dark mode styles */
+        .dark body {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+        .dark .bg-primary-light {
+            background-color: #1e293b;
+        }
+        .dark .text-text-body {
+            color: #d1d5db;
+        }
+        .dark .text-text-dark {
+            color: #e5e7eb;
+        }
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+        .dark .shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="font-sans bg-primary-light dark:bg-gray-900 text-text-body">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="text-primary dark:text-blue-400 text-2xl font-bold">
+                            <i class="fas fa-balance-scale-right mr-2"></i>
+                            ScreenBalance
+                        </div>
+                    </div>
+                    <!-- Desktop Navigation Links -->
+                    <div class="hidden md:ml-6 md:flex md:space-x-8">
+                        <a href="index.html" class="border-b-2 border-primary text-text-dark dark:text-white font-medium text-base px-1 pt-1 border-b-2">Home</a>
+                        <a href="tools.html" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Tools</a>
+                        <a href="resources.html" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Resources</a>
+                        <a href="stories.html" class="border-transparent text-text-dark dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-white font-medium text-base px-1 pt-1 border-b-2">Stories</a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="login.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-accent-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green transition duration-150 ease-in-out">
+                        Get Started
+                    </a>
+                    <!-- Mobile menu button -->
+                    <div class="flex md:hidden ml-4">
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-text-dark dark:text-gray-400 hover:text-primary hover:bg-primary-light dark:hover:bg-gray-700 focus:outline-none">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#" class="bg-primary-light dark:bg-gray-900 text-primary dark:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Tools</a>
+                <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Resources</a>
+                <a href="#" class="text-text-dark dark:text-gray-300 hover:bg-primary-light dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Stories</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative bg-primary-light dark:bg-gray-800 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-primary-light dark:bg-gray-800 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-text-dark dark:text-white sm:text-5xl md:text-6xl">
+                            <span class="block">Take control of your</span>
+                            <span class="block text-primary">digital life</span>
+                        </h1>
+                        <p class="mt-3 text-base text-text-body dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            Balance your screen time, boost your productivity, and improve your well-being with tools designed specifically for students.
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                            <div class="rounded-md shadow">
+                                <a href="login.html" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-accent-green hover:bg-green-700 md:py-4 md:text-lg md:px-10 transition duration-150 ease-in-out">
+                                    Get Started
+                                </a>
+                            </div>
+                            <div class="mt-3 sm:mt-0 sm:ml-3">
+                                <a href="#learn-more" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-white dark:bg-gray-700 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-600 md:py-4 md:text-lg md:px-10 transition duration-150 ease-in-out">
+                                    Learn More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+            <div class="h-56 w-full bg-primary-light dark:bg-gray-800 sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center p-8">
+                <!-- SVG illustration representing screen time balance -->
+                <svg class="w-full max-w-lg" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="200" y="100" width="400" height="300" rx="20" fill="#3b82f6" opacity="0.2" />
+                    <rect x="220" y="120" width="360" height="240" rx="10" fill="white" class="dark:fill-gray-700" />
+                    <circle cx="400" cy="350" r="15" fill="#3b82f6" />
+                    <path d="M320 180 L480 180 L480 280 L320 280 Z" fill="#f0f7ff" class="dark:fill-gray-600" />
+                    <path d="M350 210 L450 210 M350 230 L450 230 M350 250 L400 250" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" />
+                    <circle cx="600" cy="400" r="70" fill="#65a30d" opacity="0.2" />
+                    <circle cx="200" cy="350" r="50" fill="#f97316" opacity="0.2" />
+                    <path d="M600 400 L650 350 M600 400 L650 450" stroke="#65a30d" stroke-width="4" stroke-linecap="round" />
+                    <path d="M200 350 L150 300 M200 350 L150 400" stroke="#f97316" stroke-width="4" stroke-linecap="round" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen Time Impact Section -->
+    <div id="learn-more" class="py-12 bg-white dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold tracking-tight text-text-dark dark:text-white sm:text-4xl">
+                    The Impact of Screen Time
+                </h2>
+                <p class="mt-4 max-w-2xl text-xl text-text-body dark:text-gray-300 lg:mx-auto">
+                    Understanding how digital habits affect your well-being is the first step to creating balance.
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <!-- Sleep Impact Card -->
+                    <div class="stat-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg p-6 bg-white dark:bg-gray-700">
+                        <div class="flex justify-center">
+                            <div class="text-primary dark:text-blue-400 text-4xl mb-4">
+                                <i class="fas fa-moon"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-text-dark dark:text-white mb-2 text-center">Sleep Disruption</h3>
+                        <p class="text-text-body dark:text-gray-300 mb-4">
+                            Blue light from screens can reduce melatonin production, making it harder to fall asleep.
+                        </p>
+                        <div class="relative pt-1">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-semibold inline-block text-primary dark:text-blue-400">
+                                        71% of students report insufficient sleep
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200 dark:bg-gray-600">
+                                <div style="--fill-width: 71%" class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mental Health Impact Card -->
+                    <div class="stat-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg p-6 bg-white dark:bg-gray-700">
+                        <div class="flex justify-center">
+                            <div class="text-primary dark:text-blue-400 text-4xl mb-4">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-text-dark dark:text-white mb-2 text-center">Mental Well-being</h3>
+                        <p class="text-text-body dark:text-gray-300 mb-4">
+                            Excessive screen time is linked to increased anxiety and decreased concentration.
+                        </p>
+                        <div class="relative pt-1">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-semibold inline-block text-primary dark:text-blue-400">
+                                        63% report increased stress from social media
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200 dark:bg-gray-600">
+                                <div style="--fill-width: 63%" class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Physical Impact Card -->
+                    <div class="stat-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg p-6 bg-white dark:bg-gray-700">
+                        <div class="flex justify-center">
+                            <div class="text-primary dark:text-blue-400 text-4xl mb-4">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-text-dark dark:text-white mb-2 text-center">Physical Health</h3>
+                        <p class="text-text-body dark:text-gray-300 mb-4">
+                            From eye strain to reduced physical activity, screens can affect your body.
+                        </p>
+                        <div class="relative pt-1">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-semibold inline-block text-primary dark:text-blue-400">
+                                        58% report eye strain and headaches
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200 dark:bg-gray-600">
+                                <div style="--fill-width: 58%" class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Average Screen Time Stats -->
+    <div class="py-12 bg-primary-light dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold tracking-tight text-text-dark dark:text-white sm:text-4xl">
+                    How Do You Compare?
+                </h2>
+                <p class="mt-4 max-w-2xl text-xl text-text-body dark:text-gray-300 lg:mx-auto">
+                    The average teen spends over 7 hours daily on screens outside of school work.
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="relative bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+                    <div class="px-4 py-5 sm:p-6">
+                        <!-- Screen Time Graph -->
+                        <div class="h-64 mb-4">
+                            <canvas id="screenTimeChart"></canvas>
+                        </div>
+                        <div class="text-sm mt-4 text-gray-500 dark:text-gray-400 text-center">
+                            Source: Common Sense Media Research, 2023
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips and Strategies Section -->
+    <div class="py-12 bg-white dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold tracking-tight text-text-dark dark:text-white sm:text-4xl">
+                    Practical Strategies
+                </h2>
+                <p class="mt-4 max-w-2xl text-xl text-text-body dark:text-gray-300 lg:mx-auto">
+                    Simple habits that can make a big difference in your digital wellness.
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Tip 1 -->
+                    <div class="tip-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg overflow-hidden">
+                        <div class="p-5 bg-white dark:bg-gray-700">
+                            <div class="text-accent-green dark:text-green-400 text-3xl mb-3">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-text-dark dark:text-white mb-2">Time Blocking</h3>
+                            <p class="text-text-body dark:text-gray-300">
+                                Schedule specific times for social media and entertainment. Use a timer to stick to your limits.
+                            </p>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 dark:bg-gray-600">
+                            <a href="#" class="text-sm text-primary dark:text-blue-400 font-medium hover:text-primary-dark">
+                                Learn more <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tip 2 -->
+                    <div class="tip-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg overflow-hidden">
+                        <div class="p-5 bg-white dark:bg-gray-700">
+                            <div class="text-accent-orange dark:text-orange-400 text-3xl mb-3">
+                                <i class="fas fa-bell-slash"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-text-dark dark:text-white mb-2">Notification Detox</h3>
+                            <p class="text-text-body dark:text-gray-300">
+                                Turn off non-essential notifications. Check messages and updates at scheduled times.
+                            </p>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 dark:bg-gray-600">
+                            <a href="#" class="text-sm text-primary dark:text-blue-400 font-medium hover:text-primary-dark">
+                                Learn more <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tip 3 -->
+                    <div class="tip-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg overflow-hidden">
+                        <div class="p-5 bg-white dark:bg-gray-700">
+                            <div class="text-accent-green dark:text-green-400 text-3xl mb-3">
+                                <i class="fas fa-moon"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-text-dark dark:text-white mb-2">Screen-Free Zones</h3>
+                            <p class="text-text-body dark:text-gray-300">
+                                Create areas in your home where screens aren't allowed, like your bedroom or dining table.
+                            </p>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 dark:bg-gray-600">
+                            <a href="#" class="text-sm text-primary dark:text-blue-400 font-medium hover:text-primary-dark">
+                                Learn more <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tip 4 -->
+                    <div class="tip-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg overflow-hidden">
+                        <div class="p-5 bg-white dark:bg-gray-700">
+                            <div class="text-accent-orange dark:text-orange-400 text-3xl mb-3">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-text-dark dark:text-white mb-2">20-20-20 Rule</h3>
+                            <p class="text-text-body dark:text-gray-300">
+                                Every 20 minutes, look at something 20 feet away for 20 seconds to reduce eye strain.
+                            </p>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 dark:bg-gray-600">
+                            <a href="#" class="text-sm text-primary dark:text-blue-400 font-medium hover:text-primary-dark">
+                                Learn more <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tip 5 -->
+                    <div class="tip-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg overflow-hidden">
+                        <div class="p-5 bg-white dark:bg-gray-700">
+                            <div class="text-accent-green dark:text-green-400 text-3xl mb-3">
+                                <i class="fas fa-list-check"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-text-dark dark:text-white mb-2">Purposeful Browsing</h3>
+                            <p class="text-text-body dark:text-gray-300">
+                                Before opening an app, ask yourself why. Set a specific goal for your screen time.
+                            </p>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 dark:bg-gray-600">
+                            <a href="#" class="text-sm text-primary dark:text-blue-400 font-medium hover:text-primary-dark">
+                                Learn more <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tip 6 -->
+                    <div class="tip-card border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg overflow-hidden">
+                        <div class="p-5 bg-white dark:bg-gray-700">
+                            <div class="text-accent-orange dark:text-orange-400 text-3xl mb-3">
+                                <i class="fas fa-people-group"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-text-dark dark:text-white mb-2">Social Accountability</h3>
+                            <p class="text-text-body dark:text-gray-300">
+                                Challenge friends to reduce screen time together. Share progress and support each other.
+                            </p>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 dark:bg-gray-600">
+                            <a href="#" class="text-sm text-primary dark:text-blue-400 font-medium hover:text-primary-dark">
+                                Learn more <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Stories Section -->
+    <div class="py-12 bg-primary-light dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold tracking-tight text-text-dark dark:text-white sm:text-4xl">
+                    Real Student Stories
+                </h2>
+                <p class="mt-4 max-w-2xl text-xl text-text-body dark:text-gray-300 lg:mx-auto">
+                    Hear from other students who have found their digital balance.
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+                    <!-- Story 1 -->
+                    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-primary rounded-full h-12 w-12 flex items-center justify-center text-white text-xl">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-bold text-text-dark dark:text-white">Michael, 16</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">High School Junior</p>
+                                </div>
+                            </div>
+                            <p class="text-text-body dark:text-gray-300 mb-4">
+                                "I was spending over 6 hours a day on my phone, mostly gaming and social media. My grades were slipping, and I was constantly tired. After setting app time limits and creating a schedule, I cut my screen time in half. My sleep improved, and I have more time for basketball and friends."
+                            </p>
+                            <div class="text-sm text-gray-600 dark:text-gray-400 italic">
+                                Reduced screen time by 50% in 3 weeks
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Story 2 -->
+                    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-accent-orange rounded-full h-12 w-12 flex items-center justify-center text-white text-xl">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-bold text-text-dark dark:text-white">Sophia, 15</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">High School Sophomore</p>
+                                </div>
+                            </div>
+                            <p class="text-text-body dark:text-gray-300 mb-4">
+                                "I was constantly anxious about missing notifications and comparing myself to others on Instagram. I started with small changes like turning off notifications and not using my phone before bed. Now I feel more present and less stressed. My concentration has improved too!"
+                            </p>
+                            <div class="text-sm text-gray-600 dark:text-gray-400 italic">
+                                Improved focus and reduced anxiety in 4 weeks
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Started Section -->
+    <div id="get-started" class="py-12 bg-white dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold tracking-tight text-text-dark dark:text-white sm:text-4xl">
+                    Start Your Digital Balance Journey
+                </h2>
+                <p class="mt-4 max-w-2xl text-xl text-text-body dark:text-gray-300 lg:mx-auto">
+                    Take the first step toward healthier screen habits today.
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="bg-primary-light dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
+                    <div class="px-6 py-8 sm:px-10 sm:py-12">
+                        <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+                            <div>
+                                <h3 class="text-2xl font-bold text-text-dark dark:text-white mb-4">Track Your Screen Time</h3>
+                                <p class="text-text-body dark:text-gray-300 mb-6">
+                                    The first step is understanding your current habits. Use our free tracking tools to see how you're really spending your digital time.
+                                </p>
+                                <div>
+                                    <a href="#" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-accent-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green transition duration-150 ease-in-out">
+                                        Start Tracking <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-text-dark dark:text-white mb-4">Set Personal Goals</h3>
+                                <p class="text-text-body dark:text-gray-300 mb-6">
+                                    Create customized goals based on your needs. Whether it's reducing social media, gaming time, or late-night browsing.
+                                </p>
+                                <div>
+                                    <a href="#" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-accent-orange hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-orange transition duration-150 ease-in-out">
+                                        Create Goals <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Newsletter Section -->
+    <div class="py-12 bg-primary dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                    Stay Updated
+                </h2>
+                <p class="mt-4 max-w-2xl text-xl text-gray-200 lg:mx-auto">
+                    Get weekly tips and strategies delivered to your inbox.
+                </p>
+            </div>
+
+            <div class="mt-10 max-w-md mx-auto">
+                <form class="grid grid-cols-1 gap-y-4 sm:grid-cols-4 sm:gap-x-4">
+                    <div class="sm:col-span-3">
+                        <label for="email" class="sr-only">Email address</label>
+                        <input type="email" name="email" id="email" autocomplete="email" class="block w-full shadow-sm focus:ring-accent-green focus:border-accent-green sm:text-base border-gray-300 rounded-md p-3 text-base" placeholder="Your email address">
+                    </div>
+                    <div class="sm:col-span-1">
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-accent-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green">
+                            Subscribe
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-3 text-sm text-gray-300 text-center">
+                    We respect your privacy. Unsubscribe at any time.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <div class="mt-8 flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-primary">
+                    <span class="sr-only">Facebook</span>
+                    <i class="fab fa-facebook fa-2x"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-primary">
+                    <span class="sr-only">Instagram</span>
+                    <i class="fab fa-instagram fa-2x"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-primary">
+                    <span class="sr-only">Twitter</span>
+                    <i class="fab fa-twitter fa-2x"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-primary">
+                    <span class="sr-only">YouTube</span>
+                    <i class="fab fa-youtube fa-2x"></i>
+                </a>
+            </div>
+            <nav class="mt-8 flex flex-wrap justify-center" aria-label="Footer">
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 dark:text-gray-400 hover:text-primary">About</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 dark:text-gray-400 hover:text-primary">Blog</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 dark:text-gray-400 hover:text-primary">Resources</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 dark:text-gray-400 hover:text-primary">Contact</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 dark:text-gray-400 hover:text-primary">Privacy Policy</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 dark:text-gray-400 hover:text-primary">Terms of Service</a>
+                </div>
+            </nav>
+            <p class="mt-8 text-center text-base text-gray-500 dark:text-gray-400">
+                &copy; 2023 ScreenBalance. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Screen Time Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('screenTimeChart').getContext('2d');
+            
+            // Check if dark mode is enabled
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#e5e7eb' : '#333333';
+            
+            const screenTimeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Social Media', 'Gaming', 'Video Streaming', 'Messaging', 'Homework', 'Other'],
+                    datasets: [{
+                        label: 'Hours per Day',
+                        data: [2.4, 1.8, 1.5, 0.8, 1.2, 0.5],
+                        backgroundColor: [
+                            '#3b82f6', // primary blue
+                            '#65a30d', // lime green
+                            '#f97316', // orange
+                            '#8b5cf6', // purple
+                            '#06b6d4', // cyan
+                            '#6b7280'  // gray
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' hours/day';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 3,
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update chart colors when dark mode changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                location.reload(); // Simple solution to update chart colors
+            });
+        });
+    </script>
+</body>
+</html>
